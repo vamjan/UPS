@@ -5,13 +5,8 @@
  */
 package ups_wargame_client.net_interface;
 
-import com.sun.javafx.image.impl.IntArgb;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  *
@@ -19,102 +14,47 @@ import java.net.UnknownHostException;
  */
 public class ClientOutputThread {
 
-    private Socket socket = null;
-    private BufferedReader console = null;
     private OutputStreamWriter streamOut = null;
-    private ClientInputThread client = null;
-    private Thread inputThread = null;
-    private boolean running = true;
-    private String serverName = null;
-    private int serverPort = 0;
 
-    public ClientOutputThread() {
-        console = new BufferedReader(new InputStreamReader(System.in));
-        this.run();
+    public ClientOutputThread(OutputStreamWriter writer) {
+        streamOut = writer;
     }
 
     public void run() {
-        String tmp = null;
-        try {
-            tmp = console.readLine();
-            //kontrola hosta
-            serverName = tmp;
-            tmp = console.readLine();
-            serverPort = Integer.parseInt(tmp);
-        } catch (IOException ioe) {
-            System.out.println("Input error" + ioe.getMessage());
-            System.exit(0);
-        } catch (NumberFormatException nfe) {
-            System.out.println("Not a number" + nfe.getMessage());
-            System.exit(0);
-        } finally {
-            this.start();
-        }
+        /*this.start();
 
-        while (running) {
-            try {
-                tmp = console.readLine();
-                if (!tmp.equals("exit")) {
-                    streamOut.write(tmp);
-                    streamOut.flush();
-                } else {
-                    this.stop();
-                }
-            } catch (IOException ioe) {
-                System.out.println("Sending error: " + ioe.getMessage());
-                //this.stop();
-            }
-        }
-    
         
-        System.out.println("Client run ended");
+
+        System.out.println("Client run ended");*/
     }
 
-    public void handle(String msg) throws IOException{
-        if (msg == null || msg.equals("exit")) {
-            System.out.println("Shutting down ...");
-            this.stop();
-        } else if (msg.equals("Who are you?")) {
-            streamOut.write("I am your doom!");
+    public void handle(String msg) {
+        this.write(msg);
+        System.out.println("Sending message: " + msg);
+    }
+
+    public void write(String msg) {
+        try {
+            streamOut.write(msg);
             streamOut.flush();
-        } else {
-            System.out.println("Incoming messsage: " + msg);
+        } catch (IOException ioe) {
+            System.err.println("Unable to send: " + ioe.getMessage());
         }
     }
 
     public void start() {
-        System.out.println("Establishing connection. Please wait ...");
-        try {
-            socket = new Socket(serverName, serverPort);
-            System.out.println("Connected: " + socket);
-            client = new ClientInputThread(this, socket);
-            (inputThread = new Thread(client)).start();
-            streamOut = new OutputStreamWriter(socket.getOutputStream());
-        } catch (UnknownHostException uhe) {
-            System.out.println("Host unknown: " + uhe.getMessage());
-        } catch (IOException ioe) {
-            System.out.println("Unexpected exception: " + ioe.getMessage());
-        }
 
-        running = true;
     }
 
     public void stop() {
-        running = false;
-
         try {
             if (streamOut != null) {
                 streamOut.close();
             }
-            if (socket != null) {
-                socket.close();
-            }
         } catch (IOException ioe) {
-            System.out.println("Error closing ...");
+            System.err.println("Error closing ..." + ioe.getMessage());
         }
-
-        client.stop();
-        client.close();
+        System.out.println("Stopping output ...");
     }
 
 }

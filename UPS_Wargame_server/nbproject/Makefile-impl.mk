@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=Wargame_UPS
+PROJECTNAME=UPS_Wargame_server
 
 # Active Configuration
 DEFAULTCONF=Debug

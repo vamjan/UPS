@@ -19,13 +19,18 @@ public class Parser {
      */
     private Parser() { }
     
-    public static void parseInput() {
+    public static Command parseInput(String input) {
+        Command retval = null;
+        //placeholder
+        String[] tmp = input.split("\\|");
         
+        retval = new Command((int)Long.parseLong(tmp[0], 16), MsgType.getMsgTypeByName(tmp[1].charAt(0)), 
+                            Short.parseShort(tmp[2]), tmp[3], tmp[4], tmp[5], tmp[6]);
+        //end of placeholder
+        return retval;
     }
     
-    public static String parseOutput() {
-        String retval = null;
-        
-        return retval;
+    public static String parseOutput(Command output) {
+        return output.toString();
     }
 }

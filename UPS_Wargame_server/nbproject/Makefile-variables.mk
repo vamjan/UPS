@@ -9,11 +9,11 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
-CND_ARTIFACT_NAME_Debug=wargame_ups
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/wargame_ups
+CND_ARTIFACT_NAME_Debug=ups_wargame_server
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/ups_wargame_server
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
-CND_PACKAGE_NAME_Debug=wargameups.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/wargameups.tar
+CND_PACKAGE_NAME_Debug=upswargameserver.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/upswargameserver.tar
 # Release configuration
 CND_PLATFORM_Release=MinGW-Windows
 CND_ARTIFACT_DIR_Release=dist/Release/MinGW-Windows

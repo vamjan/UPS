@@ -17,13 +17,11 @@ import java.net.Socket;
 public class ClientInputThread implements Runnable {
 
     private Socket clientSocket = null;
-    private ClientOutputThread client = null;
     private BufferedReader streamIn = null;
     private boolean running;
 
-    public ClientInputThread(ClientOutputThread client, Socket socket) {
+    public ClientInputThread(Socket socket) {
         this.clientSocket = socket;
-        this.client = client;
         this.running = true;
         this.open();
     }
@@ -59,11 +57,16 @@ public class ClientInputThread implements Runnable {
         while (running) {
             try {
                 String tmp = streamIn.readLine();
-                client.handle(tmp);
+                this.handle(tmp);
             } catch (IOException ioe) {
                 System.out.println("Listening error: " + ioe.getMessage());
             }
         }
+        System.out.println("Input thread stopped ...");
+    }
+
+    private void handle(String msg) {
+        System.out.println("Incoming message: " + msg);
     }
 
     public void open() {
@@ -71,13 +74,14 @@ public class ClientInputThread implements Runnable {
             streamIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException ioe) {
             System.out.println("Error getting input stream: " + ioe);
-            client.stop();
         }
     }
 
     public void close() {
         try {
-            streamIn.close();
+            if (streamIn != null) {
+                streamIn.close();
+            }
         } catch (IOException ioe) {
             System.out.println("Error closing input stream: " + ioe);
         }
