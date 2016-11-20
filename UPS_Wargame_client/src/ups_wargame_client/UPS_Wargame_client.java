@@ -22,32 +22,17 @@ public class UPS_Wargame_client extends Application{
     
     @Override
     public void start(Stage stage) {
-        /*Button btn = new Button();
-        btn.setText("Say 'Hello World'");
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-            
-            @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Hello World!");
-            }
-        });
-        
-        StackPane root = new StackPane();
-        root.getChildren().add(btn);
-        
-        Scene scene = new Scene(root, 800, 600);
-        
-        primaryStage.setTitle("Hello World!");
-        primaryStage.setScene(scene);
-        primaryStage.show();*/
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("MainWindowLayout.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("views/MainWindowLayout.fxml"));
             Scene scene = new Scene(root);
         
             stage.setTitle("WARGAME");
             stage.setScene(scene);
             stage.show();
-        } catch (IOException ioe) {}
+        } catch (IOException ioe) {
+            System.err.println("Error!" + ioe.getMessage());
+            System.exit(0);
+        }
     }
 
     /**

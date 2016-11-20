@@ -12,12 +12,14 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Queue;
+import javafx.fxml.Initializable;
+import ups_wargame_client.views.IViewable;
 
 /**
  *
  * @author sini
  */
-public class ClientController {
+public class ClientController implements IController{
     
     private static ClientController instance = null;
     
@@ -32,6 +34,8 @@ public class ClientController {
     private ClientInputThread input = null;
     private Thread inputThread = null;
     
+    private IViewable viewController = null;
+    
     
     private ClientController() {
         console = new BufferedReader(new InputStreamReader(System.in));
@@ -42,7 +46,7 @@ public class ClientController {
         try{
             instance = new ClientController();
         }catch(Exception e){
-            throw new RuntimeException("Exception occured in creating singleton instance");
+            throw new RuntimeException("Exception occured in creating ClientController singleton instance");
         }
     }
     
@@ -54,7 +58,13 @@ public class ClientController {
             return null;
     }
     
+    public void setupView(IViewable controller) {
+        this.viewController = controller;
+        System.out.print("Controller setup!");
+    }
+    
     public boolean startConnection(String serverName, int serverPort) {
+        System.out.println("Thread: " + Thread.currentThread().toString());
         if(clientSocket == null)
             return setupConnection(serverName, serverPort);
         else
@@ -80,11 +90,13 @@ public class ClientController {
     }
     
     public void stopConnection() {
+        System.out.println("Thread: " + Thread.currentThread().toString());
         input.stop();
         output.stop();
         
         try {
             clientSocket.close();
+            clientSocket = null;
         } catch (IOException ioe) {
             System.err.println("Unable to close socket: " + ioe.getMessage());
         }
@@ -93,6 +105,12 @@ public class ClientController {
     }
     
     public void sendCommand(String s) { //placeholder
+        System.out.println("Thread: " + Thread.currentThread().toString());
         output.write(s);
+    }
+    
+    public void recieveMessage(String msg) {
+        if(viewController != null)
+            viewController.showServerMessage("[Server]: ", msg);
     }
 }

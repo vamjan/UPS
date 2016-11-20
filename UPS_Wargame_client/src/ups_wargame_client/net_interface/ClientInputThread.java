@@ -67,6 +67,7 @@ public class ClientInputThread implements Runnable {
 
     private void handle(String msg) {
         System.out.println("Incoming message: " + msg);
+        ClientController.getInstance().recieveMessage(msg);
     }
 
     public void open() {
