@@ -6,26 +6,30 @@
 package ups_wargame_client;
 
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.Scanner;
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import ups_wargame_client.net_interface.ClientController;
+import ups_wargame_client.control.ClientController;
+import ups_wargame_client.control.GameEngine;
+import ups_wargame_client.net_interface.Command;
+import ups_wargame_client.net_interface.Parser;
 
 /**
  *
  * @author sini
  */
-public class UPS_Wargame_client extends Application{
-    
+public class UPS_Wargame_client extends Application {
+
     @Override
     public void start(Stage stage) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource("views/MainWindowLayout.fxml"));
             Scene scene = new Scene(root);
-        
+
             stage.setTitle("WARGAME");
             stage.setScene(scene);
             stage.show();
@@ -38,10 +42,21 @@ public class UPS_Wargame_client extends Application{
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         ClientController.getInstance();
         launch(args);
     }
+
+    /*static final String AB = "0123456789ABCDEFabcdef|";
+    static SecureRandom rnd = new SecureRandom();
+
+    private static String randomString(int len) {
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(AB.charAt(rnd.nextInt(AB.length())));
+        }
+        return sb.toString();
+    }*/
 
     /*public static void main(String args[]) {
         //ClientOutputThread client = new ClientOutputThread();

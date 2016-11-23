@@ -21,7 +21,8 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import ups_wargame_client.net_interface.ClientController;
+import ups_wargame_client.control.ClientController;
+import ups_wargame_client.control.GameEngine;
 
 /**
  *
@@ -62,6 +63,9 @@ public class MainWindowLayoutController implements Initializable {
                         stage.setTitle("Wargame");
                         stage.setScene(new Scene(root));
                         stage.show();
+                        
+                        GameEngine e = new GameEngine();
+                        ClientController.getInstance().setupEngine(e);
                         // Hide this current window
                         ((Node) (event.getSource())).getScene().getWindow().hide();
                     } catch (IOException ioe) {

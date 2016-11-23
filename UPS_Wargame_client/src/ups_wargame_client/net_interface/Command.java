@@ -17,7 +17,7 @@ public class Command {
     short length;
     Object[] data;
     
-    public Command(int clientID, MsgType type, short length, Object... data) {
+    public Command(int clientID, MsgType type, short length, Object[] data) {
         this.clientID = clientID;
         this.type = type;
         this.length = length;
@@ -32,11 +32,14 @@ public class Command {
         for(Object val : data)
             retval += (val.toString() + "|");
         
-        return retval.substring(0, retval.length()-1); //clip last carka
+        if(!retval.equals(""))
+            retval = retval.substring(0, retval.length()-1); //clip last carka
+        
+        return retval;
     }
     
     @Override
     public String toString() {
-        return String.format("%08X|%c|%05d|%s|%08X\n", this.clientID, this.type.getName(), this.length, this.dataToString(), this.clientID);
+        return String.format("%08X|%c|%04X|%s|%08X\n", this.clientID, this.type.getName(), this.length, this.dataToString(), this.clientID);
     }
 }

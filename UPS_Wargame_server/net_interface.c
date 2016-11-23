@@ -64,6 +64,8 @@ void server_stuff(void *arg) {
         tests = client_socks;
         // sada deskriptoru je po kazdem volani select prepsana sadou deskriptoru kde se neco delo
         return_value = select(FD_SETSIZE, &tests, (fd_set *) 0, (fd_set *) 0, (struct timeval *) 0);
+        
+        printf("and they don't stop commin'\n");
 
         if (return_value < 0) {
             printf("Select - ERR\n");

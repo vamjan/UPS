@@ -8,29 +8,71 @@ package ups_wargame_client.net_interface;
 /**
  *
  * @author sini
- * 
- * ID|TYPE|LENGTH|DATA|ID\n
- * long|char|short|byte[]|long
+ *
+ * ID|TYPE|LENGTH|DATA|ID\n long|char|short|byte[]|long
  */
 public class Parser {
-    
+
+    private static final int MAX_MESSAGE_LENGTH = 200;
+
     /**
      * Private constructor to make class static
      */
-    private Parser() { }
-    
+    private Parser() {
+    }
+
     public static Command parseInput(String input) {
         Command retval = null;
-        //placeholder
-        String[] tmp = input.split("\\|");
-        
-        retval = new Command((int)Long.parseLong(tmp[0], 16), MsgType.getMsgTypeByName(tmp[1].charAt(0)), 
-                            Short.parseShort(tmp[2]), tmp[3], tmp[4], tmp[5], tmp[6]);
-        //end of placeholder
+
+        if (input == null) {
+            System.err.println("PARSER: No input!");
+            return retval;
+        }
+
+        if (input.length() > MAX_MESSAGE_LENGTH || input.length() < 24) {
+            System.err.println("PARSER: Message has wrong length!");
+            return retval;
+        }
+        try {
+            String id = input.substring(input.length() - 9, input.length() - 1); //get ID at the end of message
+            int idNum = (int) Long.parseLong(id, 16);
+
+            String com = findCommand(input, id);
+            String[] tmp = com.split("\\|");
+
+            MsgType type = MsgType.getMsgTypeByName(tmp[0].charAt(0));
+            if (type == null) {
+                throw new Exception();
+            }
+            
+            short msgLen = Short.parseShort(tmp[1], 16);
+
+            Object[] array = new Object[tmp.length - 2];
+            for (int i = 2; i < tmp.length; i++) {
+                array[i - 2] = tmp[i];
+            }
+            retval = new Command(idNum, type, msgLen, array);
+        } catch (Exception e) {
+            System.err.println("PARSER: Message format is wrong: " + e);
+        }
         return retval;
     }
-    
+
     public static String parseOutput(Command output) {
         return output.toString();
+    }
+
+    private static String findCommand(String msg, String id) {
+        String retval = null;
+
+        for (int i = 0; i < msg.length() - 16; i++) {
+            String curr = msg.substring(i, i + 8);
+            if (curr.equals(id)) {
+                retval = msg.substring(i + 9, msg.length() - 10);
+                break;
+            }
+        }
+
+        return retval;
     }
 }

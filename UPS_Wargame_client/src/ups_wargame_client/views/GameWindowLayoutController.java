@@ -7,6 +7,8 @@ package ups_wargame_client.views;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,7 +22,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-import ups_wargame_client.net_interface.ClientController;
+import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import ups_wargame_client.control.ClientController;
 import ups_wargame_client.net_interface.IController;
 
 /**
@@ -75,6 +80,8 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         
         controller = ClientController.getInstance();
         controller.setupView(this);
+        
+        
     }
     
     public void showServerMessage(String data, String msg) {
