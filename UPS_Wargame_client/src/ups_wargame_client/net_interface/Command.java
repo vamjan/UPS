@@ -26,6 +26,13 @@ public class Command {
         this.data = data.clone();
     }
     
+    public Command(int clientID) {
+        this.clientID = clientID;
+        this.type = MsgType.ACK;
+        this.length = 0;
+        this.data = new Object[0];
+    }
+    
     public String dataToString() {
         String retval = "";
         

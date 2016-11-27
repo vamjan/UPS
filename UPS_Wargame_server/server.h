@@ -8,19 +8,19 @@
  * File:   net_interface.h
  * Author: sini
  *
- * Created on 26 November 2016, 23:06
+ * Created on 29 October 2016, 21:58
  */
 
 #ifndef NET_INTERFACE_H
 #define NET_INTERFACE_H
 
-#define BUFFER_LENGTH 1000
-#define DROP 200
+typedef struct { 
+    int fd;
+    int id_key;
+    char player_name[16];
+} client_data;
 
-char *create_buffer();
-int destroy_buffer(char **buffer);
-int add_to_buffer(char *buffer, const char *msg, int *read);
-int flush_buffer(char *buffer);
+void server_stuff(void *arg);
 
 #endif /* NET_INTERFACE_H */
 

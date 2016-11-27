@@ -23,11 +23,11 @@ public class ClientController implements IController {
     private CommandRunner commandRunner = null;
 
     private IViewable viewController = null;
-    
+
     private LinkedList<String> inputQueue = null;
     //private LinkedList<Command> inputQueue = null;
     private LinkedList<Command> outputQueue = null;
-    
+
     GameEngine engine = null;
     Thread engineThread = null;
 
@@ -60,12 +60,12 @@ public class ClientController implements IController {
         this.viewController = controller;
         System.out.print("Controller setup!");
     }
-    
+
     public void setupEngine(GameEngine e) {
         this.engine = e;
         this.engineThread = new Thread(e);
         this.engineThread.start();
-        
+
         System.out.println("Engine setup!");
     }
 
@@ -81,6 +81,7 @@ public class ClientController implements IController {
     public boolean stopConnection() {
         if (commandRunner.getSocket() != null) {
             commandRunner.stopConnection();
+            engine.stopRunning();
             return true;
         } else {
 
@@ -99,31 +100,30 @@ public class ClientController implements IController {
             viewController.showServerMessage("[Server]: ", msg);
         }
     }
-    
-    public void addToInputQueue(String c) { //command c
-        synchronized(this) {
-            inputQueue.add(c);
-            synchronized(engine) {
-                engine.notifyAll();
-            }
+
+    public synchronized void addToInputQueue(String c) { //command c
+        inputQueue.add(c);
+        synchronized (engine) {
+            engine.notifyAll();
         }
     }
-    
-    public void addToOutputQueue(Command c) {
-        synchronized(this) {
-            outputQueue.add(c);
+
+    public synchronized void addToOutputQueue(Command c) {
+        outputQueue.add(c);
+        synchronized (engine) {
+            engine.notifyAll();
         }
     }
-    
-    public String retrieveInput() {
-        synchronized(this) {
-            return inputQueue.poll();
-        }
+
+    public synchronized String retrieveInput() {
+
+        return inputQueue.poll();
+
     }
-    
-    public Command retrieveOutput() {
-        synchronized(this) {
-            return outputQueue.poll();
-        }
+
+    public synchronized Command retrieveOutput() {
+
+        return outputQueue.poll();
+
     }
 }

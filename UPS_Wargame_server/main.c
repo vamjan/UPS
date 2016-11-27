@@ -18,9 +18,12 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <stdlib.h>
+#include <string.h>
 #include "hex.h"
-#include "net_interface.h"
+#include "server.h"
 #include "sini_log.h"
+#include "net_interface.h"
+#include "parser.h"
 
 /*
  * 
@@ -45,9 +48,24 @@ int main(int argc, char** argv) {
     print_playfield(pf);
     
     destroy_playfield(&pf);*/
-    
-    server_stuff(NULL);
-    
+
+    //server_stuff(NULL);
+
+    char *buff = create_buffer();
+    char msg[100] = "aaa01234567|datdatadatadata|01234567\naaa";
+    int read = 0, i = 0;
+    for (i = 0; i < 10; i++) {
+        add_to_buffer(buff, msg, &read);
+        printf("read = %d\tpointer = %p\n", read, buff);
+        command *c = parse_input(buff, read);
+        if (c) {
+            flush_buffer(buff);
+            read = 0;
+        }
+    }
+
+    destroy_buffer(&buff);
+
     return (EXIT_SUCCESS);
 }
 

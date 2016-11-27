@@ -13,12 +13,13 @@ import ups_wargame_client.net_interface.Command;
  */
 public class GameEngine implements Runnable {
 
-    final long TIMEOUT = 10000;
+    final long TIMEOUT = 100000;
     final int TICKS_PER_SECOND = 25;
     final int SKIP_TICKS = 1000 / TICKS_PER_SECOND;
     final int MAX_FRAMESKIP = 10;
 
     private ClientController controller = null;
+    private boolean running = true;
 
     public GameEngine() {
         controller = ClientController.getInstance();
@@ -82,24 +83,19 @@ public class GameEngine implements Runnable {
     public void run() {
         String c = null;
 
-        while (true) {
+        while (running) {
+            c = controller.retrieveInput();
             while (c == null) {
                 long currentTime = System.currentTimeMillis();
-                try {
-                    synchronized(this) {
-                        this.wait(TIMEOUT);
-                    }
-                } catch (InterruptedException ie) {
-                    System.err.println("Engine exception!");
-                }
-                if(System.currentTimeMillis() >= (currentTime + TIMEOUT)) {
+                this.block();
+                if (System.currentTimeMillis() >= (currentTime + TIMEOUT)) {
                     System.err.println("Timed out!");
                 }
                 c = controller.retrieveInput();
             }
-                
+
             System.out.println("Working on msg: " + c);
-            c = null;
+            controller.sendCommand((new Command(154665655)).toString());
         }
     }
 
@@ -117,4 +113,17 @@ public class GameEngine implements Runnable {
         }*/
     }
 
+    private void block() {
+        try {
+            synchronized (this) {
+                this.wait(TIMEOUT);
+            }
+        } catch (InterruptedException ie) {
+            System.err.println("Engine exception!");
+        }
+    }
+    
+    public void stopRunning() {
+        this.running = false;
+    }
 }

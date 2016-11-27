@@ -9,7 +9,7 @@
 #include <string.h>
 #include <time.h>
 
-static char momspaghetty[2][6] = { {"WARN"}, {"ERROR"} };
+static char momspaghetty[2][6] = { {"INFO"}, {"ERROR"} };
 
 void logger(const char* tag, const char* message) {
     if(!strcmp(momspaghetty[0], tag) || !strcmp(momspaghetty[1], tag)){

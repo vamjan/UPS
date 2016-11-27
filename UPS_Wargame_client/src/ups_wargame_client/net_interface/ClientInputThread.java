@@ -29,31 +29,6 @@ public class ClientInputThread implements Runnable {
 
     @Override
     public void run() {
-        /*try {
-            byte[] messageBuffer = null;
-            short bytesToRead, bytesRead;
-            String incomingMsg = null;
-
-            while (true) {
-                messageBuffer = new byte[1024];
-                incomingMsg = new String();
-                bytesRead = 0;
-                bytesToRead = streamIn.readShort();
-                while (bytesRead < bytesToRead) {
-                    int tmp = streamIn.read(messageBuffer, 0, messageBuffer.length);
-                    incomingMsg += new String(messageBuffer);
-                    if (tmp > 0) {
-                        bytesRead += tmp;
-                    } else {
-                        break;
-                    }
-                }
-                System.out.println(incomingMsg);
-            }
-
-        } catch (IOException e) {
-
-        }*/
         System.out.println("Input thread started ...");
         while (running) {
             try {

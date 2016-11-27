@@ -38,6 +38,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/hex.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/net_interface.o \
+	${OBJECTDIR}/parser.o \
+	${OBJECTDIR}/server.o \
 	${OBJECTDIR}/sini_log.o \
 	${OBJECTDIR}/unit.o
 
@@ -80,6 +82,16 @@ ${OBJECTDIR}/net_interface.o: net_interface.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/net_interface.o net_interface.c
+
+${OBJECTDIR}/parser.o: parser.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/parser.o parser.c
+
+${OBJECTDIR}/server.o: server.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/server.o server.c
 
 ${OBJECTDIR}/sini_log.o: sini_log.c
 	${MKDIR} -p ${OBJECTDIR}

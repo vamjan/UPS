@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Queue;
 
 /**
  *
@@ -23,7 +22,6 @@ public class CommandRunner {
     private String serverName = null;
     private int serverPort = 0;
     
-    private Queue<Command> commandQueue = null;
     public ClientOutputThread output = null; //placeholder private
     private ClientInputThread input = null;
     private Thread inputThread = null;

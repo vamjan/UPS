@@ -6,6 +6,8 @@
                    projectFiles="true">
       <itemPath>hex.h</itemPath>
       <itemPath>net_interface.h</itemPath>
+      <itemPath>parser.h</itemPath>
+      <itemPath>server.h</itemPath>
       <itemPath>sini_log.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -18,6 +20,8 @@
       <itemPath>hex.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>net_interface.c</itemPath>
+      <itemPath>parser.c</itemPath>
+      <itemPath>server.c</itemPath>
       <itemPath>sini_log.c</itemPath>
       <itemPath>unit.c</itemPath>
     </logicalFolder>
@@ -58,6 +62,14 @@
       </item>
       <item path="net_interface.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="parser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="parser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="server.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="server.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="sini_log.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="sini_log.h" ex="false" tool="3" flavor2="0">
@@ -95,6 +107,14 @@
       <item path="net_interface.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="net_interface.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="parser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="parser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="server.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="server.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="sini_log.c" ex="false" tool="0" flavor2="0">
       </item>
