@@ -6,17 +6,12 @@
 package ups_wargame_client;
 
 import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.Scanner;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import ups_wargame_client.control.ClientController;
-import ups_wargame_client.control.GameEngine;
-import ups_wargame_client.net_interface.Command;
-import ups_wargame_client.net_interface.Parser;
 
 /**
  *

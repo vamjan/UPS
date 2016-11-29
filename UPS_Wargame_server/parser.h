@@ -34,6 +34,8 @@ int find_command_start(const char *msg, const char *id, const int end);
 command *parse_string(const char *msg);
 char *parse_output(const command *command);
 char *parse_command(const command *command);
+char *parse_data(const char **data, const int length);
+msg_type get_type(const char c);
 
 #endif /* PARSER_H */
 

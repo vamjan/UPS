@@ -36,9 +36,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/hex.o \
+	${OBJECTDIR}/lobby.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/net_interface.o \
 	${OBJECTDIR}/parser.o \
+	${OBJECTDIR}/player.o \
 	${OBJECTDIR}/server.o \
 	${OBJECTDIR}/sini_log.o \
 	${OBJECTDIR}/unit.o
@@ -58,7 +60,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=-lpthread
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -72,6 +74,11 @@ ${OBJECTDIR}/hex.o: hex.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/hex.o hex.c
+
+${OBJECTDIR}/lobby.o: lobby.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lobby.o lobby.c
 
 ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}
@@ -87,6 +94,11 @@ ${OBJECTDIR}/parser.o: parser.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/parser.o parser.c
+
+${OBJECTDIR}/player.o: player.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/player.o player.c
 
 ${OBJECTDIR}/server.o: server.c
 	${MKDIR} -p ${OBJECTDIR}

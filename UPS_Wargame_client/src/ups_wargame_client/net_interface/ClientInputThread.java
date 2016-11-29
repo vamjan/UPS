@@ -5,6 +5,7 @@
  */
 package ups_wargame_client.net_interface;
 
+import ups_wargame_client.control.Command;
 import ups_wargame_client.control.ClientController;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,9 +43,9 @@ public class ClientInputThread implements Runnable {
     }
 
     private void handle(String msg) {
-        System.out.println("Incoming message: " + msg);
-        //Command tmp = Parser.parseInput(msg);
-        ClientController.getInstance().addToInputQueue(msg);
+        System.out.println("[IN]: Incoming message: " + msg);
+        Command tmp = Parser.parseInput(msg);
+        ClientController.getInstance().addToInputQueue(tmp);
     }
 
     public void open() {

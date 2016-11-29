@@ -44,8 +44,8 @@ int add_to_buffer(char *buffer, const char *msg, int *read) {
     *read = buffer_fill;
 }
 
-int flush_buffer(char *buffer) {
+int flush_buffer(char *buffer, const int read) {
     logger("INFO", "Flushing buffer...");
-    memset(buffer, 0, sizeof(char) * BUFFER_LENGTH);
+    memset(buffer, 0, sizeof(char) * read);
     return 1;
 }

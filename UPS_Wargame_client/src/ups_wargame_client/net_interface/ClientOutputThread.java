@@ -30,7 +30,7 @@ public class ClientOutputThread {
 
     public void handle(String msg) {
         this.write(msg);
-        System.out.println("Sending message: " + msg);
+        System.out.println("[OUT]: Sending message: " + msg);
     }
 
     public void write(String msg) {

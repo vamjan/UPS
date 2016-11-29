@@ -5,11 +5,8 @@
  */
 package ups_wargame_client.control;
 
+import java.security.SecureRandom;
 import java.util.LinkedList;
-import java.util.Queue;
-import ups_wargame_client.net_interface.Command;
-import ups_wargame_client.net_interface.CommandRunner;
-import ups_wargame_client.net_interface.IController;
 import ups_wargame_client.views.IViewable;
 
 /**
@@ -20,21 +17,24 @@ public class ClientController implements IController {
 
     private static ClientController instance = null;
 
-    private CommandRunner commandRunner = null;
+    private final CommandRunner commandRunner;
 
     private IViewable viewController = null;
 
-    private LinkedList<String> inputQueue = null;
-    //private LinkedList<Command> inputQueue = null;
-    private LinkedList<Command> outputQueue = null;
+    private final LinkedList<Command> inputQueue;
+    private final LinkedList<Command> ackQueue;
+    private final LinkedList<Command> outputQueue;
 
-    GameEngine engine = null;
-    Thread engineThread = null;
+    private GameEngine engine = null;
+    private Thread engineThread = null;
+    private final int clientID;
 
     private ClientController() {
-        commandRunner = new CommandRunner();
+        commandRunner = new CommandRunner(this);
         inputQueue = new LinkedList<>();
         outputQueue = new LinkedList<>();
+        ackQueue = new LinkedList<>();
+        clientID = (new SecureRandom()).nextInt(Integer.MAX_VALUE - 1) + 1;
     }
 
     //static block initialization for exception handling
@@ -47,7 +47,7 @@ public class ClientController implements IController {
     }
 
     public static ClientController getInstance() {
-        System.out.println("YOU GET AN INSTANCE " + instance.hashCode());
+        //System.out.println("YOU GET AN INSTANCE " + instance.hashCode());
         if (instance != null) {
             return instance;
         } else {
@@ -69,13 +69,16 @@ public class ClientController implements IController {
         System.out.println("Engine setup!");
     }
 
-    public boolean startConnection(String serverName, int serverPort) {
-        System.out.println("Thread: " + Thread.currentThread().toString());
+    public boolean setupConnection(String serverName, int serverPort) {
         if (commandRunner.getSocket() == null) {
             return commandRunner.setupConnection(serverName, serverPort);
         } else {
             return false;
         }
+    }
+    
+    public void startConnection() {
+        commandRunner.startConnection();
     }
 
     public boolean stopConnection() {
@@ -84,38 +87,44 @@ public class ClientController implements IController {
             engine.stopRunning();
             return true;
         } else {
-
             return false;
         }
     }
 
     @Override
-    public void sendCommand(String msg) { //placeholder
-        System.out.println("Thread: " + Thread.currentThread().toString());
-        commandRunner.output.write(msg);
+    public void sendCommand(Command c) { //from client to server
+       commandRunner.runOutputCommand(c);
     }
 
-    public void recieveMessage(String msg) {
-        if (viewController != null) {
-            viewController.showServerMessage("[Server]: ", msg);
-        }
+    public void recieveCommand(Command c) { //from server to client
+        commandRunner.runInputCommand(c);
+    }
+    
+    public void addToAckQueue(Command c) {
+        ackQueue.add(c);
     }
 
-    public synchronized void addToInputQueue(String c) { //command c
+    @Override
+    public synchronized void addToInputQueue(Command c) {
         inputQueue.add(c);
         synchronized (engine) {
             engine.notifyAll();
         }
     }
 
+    @Override
     public synchronized void addToOutputQueue(Command c) {
         outputQueue.add(c);
         synchronized (engine) {
             engine.notifyAll();
         }
     }
+    
+    public Command retrieveAck() {
+        return ackQueue.poll();
+    }
 
-    public synchronized String retrieveInput() {
+    public synchronized Command retrieveInput() {
 
         return inputQueue.poll();
 
@@ -125,5 +134,13 @@ public class ClientController implements IController {
 
         return outputQueue.poll();
 
+    }
+    
+    public int getClientID() {
+        return this.clientID;
+    }
+    
+    public IViewable getView() {
+        return this.viewController;
     }
 }

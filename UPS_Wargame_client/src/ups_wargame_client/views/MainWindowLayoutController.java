@@ -49,7 +49,7 @@ public class MainWindowLayoutController implements Initializable {
             public void handle(ActionEvent event) {
                 String serverName = serverTF.getText();
                 String port = portTF.getText();
-                if (!ClientController.getInstance().startConnection(serverName, Integer.parseInt(port))) {
+                if (!ClientController.getInstance().setupConnection(serverName, Integer.parseInt(port))) {
                     Alert alert = new Alert(AlertType.ERROR);
                     alert.setTitle("Connection not possible");
                     alert.setHeaderText("I was unable to connect");
@@ -66,6 +66,7 @@ public class MainWindowLayoutController implements Initializable {
                         
                         GameEngine e = new GameEngine();
                         ClientController.getInstance().setupEngine(e);
+                        ClientController.getInstance().startConnection();
                         // Hide this current window
                         ((Node) (event.getSource())).getScene().getWindow().hide();
                     } catch (IOException ioe) {

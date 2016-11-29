@@ -12,13 +12,8 @@
  */
 
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-#include <netinet/in.h>
 #include <stdlib.h>
-#include <string.h>
+#include <pthread.h>
 #include "hex.h"
 #include "server.h"
 #include "sini_log.h"
@@ -49,10 +44,8 @@ int main(int argc, char** argv) {
     
     destroy_playfield(&pf);*/
 
-    //server_stuff(NULL);
-
-    char *buff = create_buffer();
-    char msg[100] = "aaa01234567|datdatadatadata|01234567\naaa";
+    /*char *buff = create_buffer();
+    char msg[100] = "aaa0FF34567|X|0002|data|data|0FF34567\naaa";
     int read = 0, i = 0;
     for (i = 0; i < 10; i++) {
         add_to_buffer(buff, msg, &read);
@@ -61,11 +54,39 @@ int main(int argc, char** argv) {
         if (c) {
             flush_buffer(buff);
             read = 0;
+            printf("%s\n", parse_output(c));
         }
     }
 
-    destroy_buffer(&buff);
+    destroy_buffer(&buff);*/
 
+    char input;
+    int run = 1;
+    pthread_t thread;
+
+    if (pthread_create(&thread, NULL, server_stuff, NULL)) {
+
+        fprintf(stderr, "Error creating thread\n");
+        return EXIT_FAILURE;
+    }
+
+
+    while (run) {
+        scanf("%c", &input);
+
+        switch (input) {
+            case 'h':
+                printf("Press 'q' to exit.\n");
+                break;
+            case 'q':
+                run = 0;
+                break;
+            default:
+                printf("Symbol %c is undefined.\n", input);
+                break;
+        }
+    }
+    
     return (EXIT_SUCCESS);
 }
 

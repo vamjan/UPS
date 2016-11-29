@@ -14,7 +14,9 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
+#include <string.h>
 #include "server.h"
+#include "parser.h"
 
 void server_stuff(void *arg) {
     int server_socket;
@@ -92,7 +94,10 @@ void server_stuff(void *arg) {
                                 break;
                             }
                         }
-                        write(client_socket, "Who are you?\n", 14);
+                        command *c = create_command(0, ACK, 0, NULL);
+                        char *com_msg = strdup(parse_output(c));
+                        write(client_socket, com_msg, strlen(com_msg));
+                        free(com_msg);
                     } else {
                         //reject if client limit is reached
                         printf("Limit clientu dosazen. Odpojuji.\n");
@@ -113,11 +118,15 @@ void server_stuff(void *arg) {
                         memset(&cbuf, 0, sizeof (char)*100);
                         read(fd, &cbuf, a2read);
                         printf("Prijato %s %d\n", cbuf, a2read);
-                        /*read(fd, &cbuf, 1);
-                        printf("Prijato %c\n", cbuf);*/
-                        cbuf[strlen(cbuf)] = '\n';
+                        
+                        command *c = create_command(0, ACK, 0, NULL);
+                        char *com_msg = strdup(parse_output(c));
+                        printf("Posilam %s\n", com_msg);
+                        write(client_socket, com_msg, strlen(com_msg));
+                        free(com_msg);
+                        sleep(1);
                         //write(fd, cbuf, strlen(cbuf));
-                        broadcast(cbuf, client_socks, max_clients, clients);
+                        //broadcast(cbuf, client_socks, max_clients, clients);
                     } else { // na socketu se stalo neco spatneho
                         close(fd);
                         FD_CLR(fd, &client_socks);

@@ -20,7 +20,7 @@
 char *create_buffer();
 int destroy_buffer(char **buffer);
 int add_to_buffer(char *buffer, const char *msg, int *read);
-int flush_buffer(char *buffer);
+int flush_buffer(char *buffer, const int read);
 
 #endif /* NET_INTERFACE_H */
 

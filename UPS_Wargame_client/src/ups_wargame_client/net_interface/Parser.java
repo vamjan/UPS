@@ -5,6 +5,8 @@
  */
 package ups_wargame_client.net_interface;
 
+import ups_wargame_client.control.Command;
+
 /**
  *
  * @author sini
@@ -34,7 +36,7 @@ public class Parser {
             return retval;
         }
         try {
-            String id = input.substring(input.length() - 9, input.length() - 1); //get ID at the end of message
+            String id = input.substring(input.length() - 8, input.length()); //get ID at the end of message
             int idNum = (int) Long.parseLong(id, 16);
 
             String com = findCommand(input, id);
@@ -44,12 +46,13 @@ public class Parser {
             if (type == null) {
                 throw new Exception();
             }
-            
-            short msgLen = Short.parseShort(tmp[1], 16);
 
-            Object[] array = new Object[tmp.length - 2];
-            for (int i = 2; i < tmp.length; i++) {
-                array[i - 2] = tmp[i];
+            short msgLen = Short.parseShort(tmp[1], 16);
+            Object[] array = new Object[msgLen];
+            if (msgLen > 0) {
+                for (int i = 2; i < tmp.length; i++) {
+                    array[i - 2] = tmp[i];
+                }
             }
             retval = new Command(idNum, type, msgLen, array);
         } catch (Exception e) {

@@ -7,8 +7,6 @@ package ups_wargame_client.views;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -22,11 +20,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-import javafx.collections.ObservableList;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import ups_wargame_client.control.ClientController;
-import ups_wargame_client.net_interface.IController;
+import ups_wargame_client.control.Command;
+import ups_wargame_client.control.IController;
 
 /**
  * FXML Controller class
@@ -50,6 +46,9 @@ public class GameWindowLayoutController implements Initializable, IViewable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        controller = ClientController.getInstance();
+        controller.setupView(this);
+        
         disconnectButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -74,14 +73,9 @@ public class GameWindowLayoutController implements Initializable, IViewable {
 
             @Override
             public void handle(ActionEvent event) {
-                ClientController.getInstance().sendCommand("Hello!");
+                controller.addToOutputQueue(new Command(controller.getClientID()));
             }
-        });
-        
-        controller = ClientController.getInstance();
-        controller.setupView(this);
-        
-        
+        });   
     }
     
     public void showServerMessage(String data, String msg) {
@@ -90,6 +84,6 @@ public class GameWindowLayoutController implements Initializable, IViewable {
 
     @Override
     public void showLobbyMessage(String data, String msg) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        lobbyChatTextArea.appendText(data + msg + '\n');
     }
 }
