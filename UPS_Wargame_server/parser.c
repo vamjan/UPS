@@ -13,8 +13,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "parser.h"
+#include "sini_log.h"
 #include "net_interface.h"
+
+extern char *strdup(const char *s);
 
 command *create_command(int id_key, msg_type type, short length, char **data) {
     command *retval = malloc(sizeof (command));
@@ -23,6 +27,17 @@ command *create_command(int id_key, msg_type type, short length, char **data) {
     retval->type = type;
     retval->length = length;
     retval->data = data;
+
+    return retval;
+}
+
+command *create_ack(int id_key, int type) {
+    command *retval = malloc(sizeof (command));
+
+    retval->id_key = id_key;
+    retval->type = type ? ACK : NACK;
+    retval->length = 0;
+    retval->data = NULL;
 
     return retval;
 }
@@ -37,19 +52,21 @@ int destroy_command(command **command) {
     return 1;
 }
 
-command *parse_input(const char *msg, const int read) {
-    int i, start, msg_length = strlen(msg);
+command *parse_input(const char *msg, int *read) {
+    int i, start, prev_end = *read, msg_length = strlen(msg); //TODO: bordeeel
     command *retval = NULL;
-    for (i = read; i < msg_length; i++) {
+    for (i = *read; i < prev_end + msg_length; i++) {
+        (*read)++;
         if (msg[i] == '\n') {
             char id[9];
             id[8] = 0;
             memcpy(id, msg + (i - 8), sizeof (char) * 8);
             start = find_command_start(msg, id, i);
             int length = i - start;
-            if (length < 24)
-                printf("BAD!\n"); //TODO: return bad
-
+            if (length < 24) {
+                printf("[PARSER]: BAD!\n");
+                return retval;
+            }
             char tmp[length + 1];
             tmp[length] = 0;
             memcpy(tmp, msg + start, sizeof (char) * length);
@@ -66,7 +83,7 @@ command *parse_input(const char *msg, const int read) {
 int find_command_start(const char *msg, const char *id, const int end) {
     int i = end - 8 - 1;
 
-    for (; i > 0; i--) {
+    for (; i >= 0; i--) {
         char tmp[9];
         tmp[8] = 0;
         memcpy(tmp, msg + i, sizeof (char) * 8);
@@ -90,13 +107,13 @@ command *parse_string(const char *msg) {
     if (*err != '\0') return retval;
 
     token = strtok(NULL, DELIM);
-    if(token) type = get_type(token[0]);
+    if (token) type = get_type(token[0]);
 
     token = strtok(NULL, DELIM);
     if (token) length = (short) strtol(token, &err, 16); //TODO: possible overflow
     if (*err != '\0' && (length >= 0 && length < 32767)) return retval;
 
-    data = malloc(sizeof (char *) * (length));
+    data = calloc(sizeof (char *), length);
     i = 0; //reuse
 
     token = strtok(NULL, DELIM);
@@ -114,43 +131,49 @@ command *parse_string(const char *msg) {
 
 char *parse_command(const command *command) {
     char retval[BUFFER_LENGTH], *data;
-    
-    if(command->data) {
-        data = strdup(parse_data(command->data, command->length));
-        snprintf(retval, BUFFER_LENGTH, "%08X|%c|%04X|%s|%08X", command->id_key, command->type, (short)command->length, data, command->id_key);
+
+    memset(retval, 0, sizeof (retval));
+
+    if (command->length) {
+        data = parse_data(command->data, command->length);
+        snprintf(retval, BUFFER_LENGTH, "%08X|%c|%04X|%s|%08X", command->id_key, command->type, (short) command->length, data, command->id_key);
         free(data);
     } else {
-        snprintf(retval, BUFFER_LENGTH, "%08X|%c|%04X||%08X", command->id_key, command->type, (short)command->length, command->id_key);
+        snprintf(retval, BUFFER_LENGTH, "%08X|%c|%04X||%08X", command->id_key, command->type, (short) command->length, command->id_key);
     }
-    
-    return retval;
+
+    return strdup(retval);
 }
 
-char *parse_data(const char **data, const int length) {
+char *parse_data(char **data, const int length) {
     char retval[BUFFER_LENGTH];
     int i, size = 0;
-    
-    for(i = 0; i < length; i++) {
-        memcpy(retval+size, data[i], strlen(data[i]));
+
+    memset(retval, 0, sizeof (retval));
+
+    for (i = 0; i < length; i++) {
+        memcpy(retval + size, data[i], strlen(data[i]));
         size += strlen(data[i]);
-        if(i != length-1) retval[size++] = DELIM[0];
+        if (i != length - 1) retval[size++] = DELIM[0];
     }
-    
-    return retval;
+
+    return strdup(retval);
 }
 
 char *parse_output(const command *command) {
     char retval[BUFFER_LENGTH];
-    
+
+    memset(retval, 0, sizeof (retval));
+
     snprintf(retval, BUFFER_LENGTH, "%s\n", parse_command(command));
-    
-    return retval;
+
+    return strdup(retval);
 }
 
 msg_type get_type(const char c) {
     msg_type retval;
     switch (c) {
-        case 'X': 
+        case 'X':
             retval = ACK;
             break;
         case 'Y':
@@ -159,7 +182,13 @@ msg_type get_type(const char c) {
         case 'M':
             retval = MESSAGE;
             break;
-        default: 
+        case 'C':
+            retval = CONNECT;
+            break;
+        case 'G':
+            retval = GET_SERVER;
+            break;
+        default:
             retval = 0;
             break;
     }

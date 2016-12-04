@@ -8,7 +8,6 @@
       <itemPath>lobby.h</itemPath>
       <itemPath>net_interface.h</itemPath>
       <itemPath>parser.h</itemPath>
-      <itemPath>player.h</itemPath>
       <itemPath>server.h</itemPath>
       <itemPath>sini_log.h</itemPath>
     </logicalFolder>
@@ -24,7 +23,6 @@
       <itemPath>main.c</itemPath>
       <itemPath>net_interface.c</itemPath>
       <itemPath>parser.c</itemPath>
-      <itemPath>player.c</itemPath>
       <itemPath>server.c</itemPath>
       <itemPath>sini_log.c</itemPath>
       <itemPath>unit.c</itemPath>
@@ -53,7 +51,6 @@
         <cTool>
           <standard>3</standard>
           <commandlineTool>gcc</commandlineTool>
-          <warningLevel>0</warningLevel>
         </cTool>
         <linkerTool>
           <linkerLibItems>
@@ -78,10 +75,6 @@
       <item path="parser.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="parser.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="player.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="player.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="server.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -132,10 +125,6 @@
       <item path="parser.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="parser.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="player.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="player.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="server.c" ex="false" tool="0" flavor2="0">
       </item>

@@ -40,7 +40,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/net_interface.o \
 	${OBJECTDIR}/parser.o \
-	${OBJECTDIR}/player.o \
 	${OBJECTDIR}/server.o \
 	${OBJECTDIR}/sini_log.o \
 	${OBJECTDIR}/unit.o
@@ -73,47 +72,42 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/ups_wargame_server: ${OBJECTFILES}
 ${OBJECTDIR}/hex.o: hex.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/hex.o hex.c
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/hex.o hex.c
 
 ${OBJECTDIR}/lobby.o: lobby.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lobby.o lobby.c
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/lobby.o lobby.c
 
 ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.c
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.c
 
 ${OBJECTDIR}/net_interface.o: net_interface.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/net_interface.o net_interface.c
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/net_interface.o net_interface.c
 
 ${OBJECTDIR}/parser.o: parser.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/parser.o parser.c
-
-${OBJECTDIR}/player.o: player.c
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/player.o player.c
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/parser.o parser.c
 
 ${OBJECTDIR}/server.o: server.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/server.o server.c
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/server.o server.c
 
 ${OBJECTDIR}/sini_log.o: sini_log.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/sini_log.o sini_log.c
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/sini_log.o sini_log.c
 
 ${OBJECTDIR}/unit.o: unit.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -w -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/unit.o unit.c
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/unit.o unit.c
 
 # Subprojects
 .build-subprojects:

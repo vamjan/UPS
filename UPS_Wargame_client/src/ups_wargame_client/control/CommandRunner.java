@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import ups_wargame_client.net_interface.ClientInputThread;
 import ups_wargame_client.net_interface.ClientOutputThread;
+import ups_wargame_client.net_interface.MsgType;
 
 /**
  *
@@ -41,10 +42,16 @@ public class CommandRunner {
                     break;
                 case ACK:
                     Command tmp = controller.retrieveAck();
-                    if(tmp == null) System.err.println("No ACK required");
-                    else System.out.println(tmp.toString() + " ACK");
+                    if (tmp == null) {
+                        System.err.println("No ACK required");
+                    } else {
+                        System.out.println(tmp.toString() + " ACK");
+                    }
                     break;
                 case NACK:
+                    break;
+                case GET_SERVER:
+                    controller.getView().showServerMessage("[Server]: ", command.toString());
                     break;
                 default:
                     return false;
@@ -52,6 +59,8 @@ public class CommandRunner {
         } else { //outgoing
             switch (command.type) {
                 case CONNECT:
+                    sendMessage(command);
+                    controller.addToAckQueue(command);
                     break;
                 case MESSAGE:
                     sendMessage(command);
@@ -61,6 +70,12 @@ public class CommandRunner {
                     sendMessage(command);
                     break;
                 case NACK:
+                    sendMessage(command);
+                    //maybe some stuff
+                    break;
+                case GET_SERVER:
+                    sendMessage(command);
+                    controller.addToAckQueue(command);
                     break;
                 default:
                     return false;
@@ -90,6 +105,7 @@ public class CommandRunner {
     public void startConnection() {
         System.out.println("Starting connection...");
         inputThread.start();
+        executeCommand(new Command(controller.getClientID(), MsgType.CONNECT, (short) 0, null), false);
     }
 
     public void stopConnection() {

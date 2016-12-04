@@ -15,6 +15,8 @@
 #define HEX_H
 
 #define UNIT_ARRAY 100
+#define DEFAULT_ROWS 25
+#define DEFAULT_COLS 30
 
 typedef enum {
     INFANTRY, ARMORED, ARTILERY, STRUCTURE
@@ -49,7 +51,7 @@ typedef struct {
 } playfield;
 //#pragma pack()
 
-static char default_map[25][30] = { 
+static char default_map[DEFAULT_ROWS][DEFAULT_COLS] = { 
     {'G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G'},
     {'G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G'},
     {'G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G','G'},
@@ -98,6 +100,7 @@ int rmv_unit(playfield *pf, unit* target);
 
 //UNIT FUNCTIONS
 unit *create_unit(int coord_x, int coord_z, unittype type, short ID);
+int destroy_unit(unit **u);
 int change_allegiance(unit* target, allegiance al);
 int deal_damage(unit *target, short amount);
 int move_unit(unit *target, int coord_x, int coord_z);

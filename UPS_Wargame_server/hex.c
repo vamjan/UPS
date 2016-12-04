@@ -4,10 +4,14 @@
  * and open the template in the editor.
  */
 
-#include "hex.h"
-#include "sini_log.h"
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include "hex.h"
+#include "sini_log.h"
+#include "server.h"
 
 /*
  *
@@ -125,7 +129,7 @@ int destroy_playfield(playfield **pf){
         }*/
         
         free((*pf)->terain);
-        free((*pf)->units);
+        free((*pf)->units); //TODO: memory leak
         free(*pf);
         *pf = NULL;
         

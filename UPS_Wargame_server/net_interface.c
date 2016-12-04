@@ -6,7 +6,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "net_interface.h"
+#include "sini_log.h"
 
 char *create_buffer() {
     char *retval = malloc(sizeof(char) * BUFFER_LENGTH);

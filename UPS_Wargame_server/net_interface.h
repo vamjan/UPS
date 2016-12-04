@@ -11,8 +11,8 @@
  * Created on 26 November 2016, 23:06
  */
 
-#ifndef NET_INTERFACE_H
-#define NET_INTERFACE_H
+#ifndef NETINTERFACE_H
+#define NETINTERFACE_H
 
 #define BUFFER_LENGTH 1000
 #define DROP 200
@@ -22,5 +22,5 @@ int destroy_buffer(char **buffer);
 int add_to_buffer(char *buffer, const char *msg, int *read);
 int flush_buffer(char *buffer, const int read);
 
-#endif /* NET_INTERFACE_H */
+#endif /* NETINTERFACE_H */
 

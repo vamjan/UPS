@@ -4,4 +4,81 @@
  * and open the template in the editor.
  */
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "server.h"
 #include "lobby.h"
+
+extern char *strdup(const char *s);
+
+lobby *create_lobby(char *name) {
+    lobby *retval = malloc(sizeof (lobby));
+
+    strncpy(retval->lobby_name, name, NAME_LENGTH);
+    retval->running = 0;
+    retval->game_in_progress = 0;
+    //retval->pf = create_playfield(DEFAULT_COLS, DEFAULT_ROWS);
+
+    return retval;
+}
+
+void destroy_lobby(lobby **target) {
+    destroy_playfield(&(*target)->pf);
+    free(*target);
+    *target = NULL;
+}
+
+void *start_lobby(void *params) {
+    //TODO: thread method
+    lobby *this_lobby = (lobby *) params;
+    while (this_lobby->running) {
+
+    }
+}
+
+void stop_lobby(lobby *target) {
+    target->running = 0;
+}
+
+int add_player(lobby *target, client_data *player) {
+    if (!target->player_one) {
+        target->player_one = player;
+        return 1;
+    }//success
+    else if (!target->player_two) {
+        target->player_two = player;
+        return 1;
+    }//success
+    else return 0; //failure
+}
+
+int remove_player(lobby *target, client_data *player) {
+    if (target->player_two) {
+        target->player_two = &unoc_client;
+        return 1;
+    }//success
+    else if (target->player_one) {
+        target->player_one = &unoc_client;
+        return 1;
+    }//success
+    else return 0; //failure
+}
+
+char *parse_lobby(lobby *target, int index) {
+    char retval[BUFFER_LENGTH];
+
+    memset(retval, 0, sizeof (retval));
+
+    char *player_one;
+    char *player_two;
+    if (target->player_one) player_one = target->player_one->player_name;
+    else player_one = FREE;
+    if (target->player_two) player_two = target->player_two->player_name;
+    else player_two = FREE;
+
+    snprintf(retval, BUFFER_LENGTH, "%d|%s|%c|%s|%s", index, target->lobby_name, target->game_in_progress ? 'T' : 'F', player_one, player_two);
+
+    return strdup(retval);
+}

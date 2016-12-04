@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 import ups_wargame_client.control.ClientController;
 import ups_wargame_client.control.Command;
 import ups_wargame_client.control.IController;
+import ups_wargame_client.net_interface.MsgType;
 
 /**
  * FXML Controller class
@@ -73,12 +74,14 @@ public class GameWindowLayoutController implements Initializable, IViewable {
 
             @Override
             public void handle(ActionEvent event) {
-                controller.addToOutputQueue(new Command(controller.getClientID()));
+                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.GET_SERVER, (short)0, null));
             }
         });   
     }
     
+    @Override
     public void showServerMessage(String data, String msg) {
+        System.out.println(data + msg + '\n');
         serverChatTextArea.appendText(data + msg + '\n');
     }
 

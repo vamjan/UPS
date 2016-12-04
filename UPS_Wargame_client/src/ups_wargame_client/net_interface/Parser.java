@@ -15,7 +15,7 @@ import ups_wargame_client.control.Command;
  */
 public class Parser {
 
-    private static final int MAX_MESSAGE_LENGTH = 200;
+    private static final int MAX_MESSAGE_LENGTH = 1000;
 
     /**
      * Private constructor to make class static

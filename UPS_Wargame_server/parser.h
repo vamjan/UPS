@@ -17,7 +17,14 @@
 #define DELIM "|"
 
 typedef enum {
-    ACK = 'X', NACK = 'Y', MESSAGE = 'M'
+    ACK = 'X',
+    NACK = 'Y',
+    MESSAGE = 'M',
+    CONNECT = 'C', //sync ID with server
+    GET_SERVER = 'G', //get available server data
+    CREATE_LOBBY = 'L', //create lobby/lobby is created and is waiting for you
+    JOIN_LOBBY = 'J', //join open lobby
+    LEAVE_LOBBY = 'V' //leave open lobby/you were kicked from lobby
 } msg_type;
 
 typedef struct {
@@ -28,13 +35,14 @@ typedef struct {
 } command;
 
 command *create_command(int id_key, msg_type type, short length, char **data);
+command *create_ack(int id_key, int type);
 int destroy_command(command **command);
-command *parse_input(const char *msg, const int read);
+command *parse_input(const char *msg, int *read);
 int find_command_start(const char *msg, const char *id, const int end);
 command *parse_string(const char *msg);
 char *parse_output(const command *command);
 char *parse_command(const command *command);
-char *parse_data(const char **data, const int length);
+char *parse_data(char **data, const int length);
 msg_type get_type(const char c);
 
 #endif /* PARSER_H */

@@ -14,11 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include "hex.h"
 #include "server.h"
 #include "sini_log.h"
-#include "net_interface.h"
-#include "parser.h"
 
 /*
  * 
@@ -52,7 +49,7 @@ int main(int argc, char** argv) {
         printf("read = %d\tpointer = %p\n", read, buff);
         command *c = parse_input(buff, read);
         if (c) {
-            flush_buffer(buff);
+            flush_buffer(buff, read);
             read = 0;
             printf("%s\n", parse_output(c));
         }
@@ -61,10 +58,10 @@ int main(int argc, char** argv) {
     destroy_buffer(&buff);*/
 
     char input;
-    int run = 1;
+    int run = 1, max_clients = 10;
     pthread_t thread;
 
-    if (pthread_create(&thread, NULL, server_stuff, NULL)) {
+    if (pthread_create(&thread, NULL, start_server, &max_clients)) {
 
         fprintf(stderr, "Error creating thread\n");
         return EXIT_FAILURE;
