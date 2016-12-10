@@ -40,8 +40,9 @@
                 <FlowPane fx:id="lobbyInfo" layoutX="309.0" prefHeight="706.0" prefWidth="687.0" />
                 <ButtonBar fx:id="lobbyButtonBar" layoutX="309.0" layoutY="707.0" prefHeight="40.0" prefWidth="687.0">
                     <buttons>
-                        <Button fx:id="disconnectButton" mnemonicParsing="false" text="Disconnect" />
+                        <Button fx:id="addLobbyButton" mnemonicParsing="false" text="Lobby" />
                         <Button fx:id="refreshButton" mnemonicParsing="false" text="Refresh" />
+                        <Button fx:id="disconnectButton" mnemonicParsing="false" text="Disconnect" />
                     </buttons>
                 </ButtonBar>
                 <VBox fx:id="lobbyList" prefHeight="530.0" prefWidth="300.0" />

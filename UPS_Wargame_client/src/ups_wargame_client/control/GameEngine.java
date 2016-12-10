@@ -5,16 +5,19 @@
  */
 package ups_wargame_client.control;
 
+import ups_wargame_client.net_interface.MsgType;
+
 /**
  *
  * @author sini
  */
 public class GameEngine implements Runnable {
 
-    final long TIMEOUT = 2000;
+    final long TIMEOUT = 200;
 
     private ClientController controller = null;
     private boolean running = true;
+    private int out = 0, test = 0;
 
     public GameEngine() {
         controller = ClientController.getInstance();
@@ -33,25 +36,37 @@ public class GameEngine implements Runnable {
                 this.block();
                 if (System.currentTimeMillis() >= (currentTime + TIMEOUT)) {
                     System.err.println("[ENGINE]: Timed out!");
-                    if(running == false) break;
+                    if (out >= 5) {
+                        controller.sendCommand(new Command(controller.getClientID(), MsgType.DISCONNECT, (short) 0, null));
+                        out = 0; //posible problem with timeouts creating too many disconnect commands
+                    }
+                    if (running == false) {
+                        break;
+                    }
+                    Object[] pole = {"TOTO SOU NEJAKA DATA NA ZATIZENI SITE", "TOTO SOU NEJAKA DATA NA ZATIZENI SITE", "TOTO SOU NEJAKA DATA NA ZATIZENI SITE", "TOTO SOU NEJAKA DATA NA ZATIZENI SITE" };
+                    controller.sendCommand(new Command(controller.getClientID(), MsgType.POKE, (short) 4, pole));
+                    out++;
                 }
                 input = controller.retrieveInput();
                 output = controller.retrieveOutput();
             }
-            
-            if(output != null) {
-                System.out.println("[ENGINE]: Working on input: " + output);
+
+            if (output != null) {
+                System.out.println("[ENGINE]: Working on output: " + output);
                 controller.sendCommand(output);
             }
-            if(input != null){
+            if (input != null) {
                 System.out.println("[ENGINE]: Working on input: " + input);
                 controller.recieveCommand(input);
                 currentTime = System.currentTimeMillis();
+                out = 0;
             }
-            
+
             update();
             render();
         }
+
+        System.out.println("Result on exit: " + controller.getAckString());
     }
 
     private void update() {
@@ -77,7 +92,7 @@ public class GameEngine implements Runnable {
             System.err.println("Engine exception!");
         }
     }
-    
+
     public void stopRunning() {
         this.running = false;
     }

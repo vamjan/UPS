@@ -12,5 +12,5 @@ package ups_wargame_client.views;
 public interface IViewable {
     public void showServerMessage(String data, String msg);
     public void showLobbyMessage(String data, String msg);
-    
+    public void backToStart();
 }

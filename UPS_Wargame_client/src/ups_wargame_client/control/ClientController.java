@@ -143,4 +143,15 @@ public class ClientController implements IController {
     public IViewable getView() {
         return this.viewController;
     }
+    
+    public String getAckString() {
+        String s = "";
+        
+        while(!ackQueue.isEmpty()) {
+            s += ackQueue.poll().toString();
+            s += '\n';
+        }
+        
+        return s;
+    }
 }

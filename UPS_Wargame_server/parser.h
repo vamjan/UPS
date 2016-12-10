@@ -24,7 +24,8 @@ typedef enum {
     GET_SERVER = 'G', //get available server data
     CREATE_LOBBY = 'L', //create lobby/lobby is created and is waiting for you
     JOIN_LOBBY = 'J', //join open lobby
-    LEAVE_LOBBY = 'V' //leave open lobby/you were kicked from lobby
+    LEAVE_LOBBY = 'V', //leave open lobby/you were kicked from lobby
+    POKE = 'P'
 } msg_type;
 
 typedef struct {

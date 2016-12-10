@@ -25,6 +25,7 @@ void stop_lobby(lobby *target);
 
 int add_player(lobby *target, client_data *player);
 int remove_player(lobby *target, client_data *player);
+int lobby_is_empty(lobby *target);
 char *parse_lobby(lobby *target, int index);
 
 #endif /* LOBBY_H */

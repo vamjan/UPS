@@ -71,7 +71,7 @@ public class Parser {
         for (int i = 0; i < msg.length() - 16; i++) {
             String curr = msg.substring(i, i + 8);
             if (curr.equals(id)) {
-                retval = msg.substring(i + 9, msg.length() - 10);
+                retval = msg.substring(i + 9, msg.length() - 9);
                 break;
             }
         }

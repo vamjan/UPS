@@ -31,16 +31,23 @@ import ups_wargame_client.net_interface.MsgType;
  * @author sini
  */
 public class GameWindowLayoutController implements Initializable, IViewable {
-    
+
     private IController controller = null;
 
-    @FXML private TabPane chatPane;
+    @FXML
+    private TabPane chatPane;
 
-    @FXML private Button disconnectButton;
-    @FXML private Button refreshButton;
-    
-    @FXML private TextArea serverChatTextArea;
-    @FXML private TextArea lobbyChatTextArea;
+    @FXML
+    private Button disconnectButton;
+    @FXML
+    private Button refreshButton;
+    @FXML
+    private Button addLobbyButton;
+
+    @FXML
+    private TextArea serverChatTextArea;
+    @FXML
+    private TextArea lobbyChatTextArea;
 
     /**
      * Initializes the controller class.
@@ -49,36 +56,32 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     public void initialize(URL url, ResourceBundle rb) {
         controller = ClientController.getInstance();
         controller.setupView(this);
-        
+
         disconnectButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
-                ClientController.getInstance().stopConnection();
-                try {
-                    Parent root = FXMLLoader.load(getClass().getResource("MainWindowLayout.fxml"));
-                    Scene scene = new Scene(root);
-                    Stage stage = new Stage();
-                    stage.setTitle("WARGAME");
-                    stage.setScene(scene);
-                    stage.show();
-                    ((Node) (event.getSource())).getScene().getWindow().hide();
-                } catch (IOException ioe) {
-                    System.err.println("Error!" + ioe.getMessage());
-                    System.exit(0);
-                }
+                backToStart();
             }
         });
-        
+
         refreshButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
-                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.GET_SERVER, (short)0, null));
+                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.GET_SERVER, (short) 0, null));
             }
-        });   
+        });
+
+        addLobbyButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                Object o[] = {"LOBBYNAME"};
+                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.CREATE_LOBBY, (short) 1, o));
+            }
+        });
     }
-    
+
     @Override
     public void showServerMessage(String data, String msg) {
         System.out.println(data + msg + '\n');
@@ -88,5 +91,23 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     @Override
     public void showLobbyMessage(String data, String msg) {
         lobbyChatTextArea.appendText(data + msg + '\n');
+    }
+
+    @Override
+    public void backToStart() {
+        ClientController.getInstance().stopConnection();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("MainWindowLayout.fxml"));
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.setTitle("WARGAME");
+            stage.setScene(scene);
+            stage.show();
+            //((Node) (event.getSource())).getScene().getWindow().hide();
+            ((Stage)chatPane.getScene().getWindow()).hide();
+        } catch (IOException ioe) {
+            System.err.println("Error!" + ioe.getMessage());
+            System.exit(0);
+        }
     }
 }

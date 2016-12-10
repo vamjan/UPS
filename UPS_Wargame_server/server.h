@@ -55,7 +55,9 @@ static lobby unoc_lobby = {0};
 void *start_server(void *arg);
 client_data *create_client(int fd);
 void destroy_client(client_data **client);
+void *start_client(void *arg);
 int find_client_by_fd(client_data *clients[], int fd, int max_clients);
+int init_lobby(lobby *lobbies[], int max_lobbies, char *name);
 command *execute_command(command *c, client_data *client, server_data *server);
 int send_command(command *c);
 

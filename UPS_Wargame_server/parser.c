@@ -188,6 +188,12 @@ msg_type get_type(const char c) {
         case 'G':
             retval = GET_SERVER;
             break;
+        case 'L':
+            retval = CREATE_LOBBY;
+            break;
+        case 'P':
+            retval = POKE;
+            break;
         default:
             retval = 0;
             break;

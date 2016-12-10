@@ -66,6 +66,13 @@ int remove_player(lobby *target, client_data *player) {
     else return 0; //failure
 }
 
+int lobby_is_empty(lobby *target) {
+    if (!target->player_one && !target->player_two)
+        return 1;
+    else
+        return 0;
+}
+
 char *parse_lobby(lobby *target, int index) {
     char retval[BUFFER_LENGTH];
 

@@ -19,13 +19,14 @@ public enum MsgType {
     END('E'), //server or client ended the game session
     MOVE('O'), //move unit from [X1, Y1] to [X2, Y2]
     ATTACK('A'), //unit A attacks unit B for X dmg
-    CAPTURE('P'), //unit A captured zone Z
+    CAPTURE('Z'), //unit A captured zone Z
     GET_LOBBY('G'), //get available lobby data
     CREATE_LOBBY('L'), //create lobby/lobby is created and is waiting for you
     JOIN_LOBBY('J'), //join open lobby
     LEAVE_LOBBY('V'), //leave open lobby/you were kicked from lobby
     ACK('X'), //acknowledge success
-    NACK('Y'); //
+    NACK('Y'), //
+    POKE('P');
     
 
     private char name;
