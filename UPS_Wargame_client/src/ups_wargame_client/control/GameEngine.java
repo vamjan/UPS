@@ -13,7 +13,7 @@ import ups_wargame_client.net_interface.MsgType;
  */
 public class GameEngine implements Runnable {
 
-    final long TIMEOUT = 200;
+    final long TIMEOUT = 1000;
 
     private ClientController controller = null;
     private boolean running = true;
@@ -38,13 +38,12 @@ public class GameEngine implements Runnable {
                     System.err.println("[ENGINE]: Timed out!");
                     if (out >= 5) {
                         controller.sendCommand(new Command(controller.getClientID(), MsgType.DISCONNECT, (short) 0, null));
-                        out = 0; //posible problem with timeouts creating too many disconnect commands
+                        this.stopRunning(); //TODO: fuj
                     }
                     if (running == false) {
                         break;
                     }
-                    Object[] pole = {"TOTO SOU NEJAKA DATA NA ZATIZENI SITE", "TOTO SOU NEJAKA DATA NA ZATIZENI SITE", "TOTO SOU NEJAKA DATA NA ZATIZENI SITE", "TOTO SOU NEJAKA DATA NA ZATIZENI SITE" };
-                    controller.sendCommand(new Command(controller.getClientID(), MsgType.POKE, (short) 4, pole));
+                    controller.sendCommand(new Command(controller.getClientID(), MsgType.POKE, (short) 0, null));
                     out++;
                 }
                 input = controller.retrieveInput();

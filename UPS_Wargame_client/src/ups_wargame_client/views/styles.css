@@ -1,9 +1,20 @@
 
 
 .label {
-    -fx-alignment: CENTER;
     -fx-text-fill: #96b946;
     -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+#playerLabel {
+    -fx-text-fill: #96b946;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+#vsLabel {
+    -fx-text-fill: black;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
 

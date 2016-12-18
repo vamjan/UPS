@@ -14,7 +14,7 @@
 extern char *strdup(const char *s);
 
 lobby *create_lobby(char *name) {
-    lobby *retval = malloc(sizeof (lobby));
+    lobby *retval = calloc(sizeof (lobby), 1);
 
     strncpy(retval->lobby_name, name, NAME_LENGTH);
     retval->running = 0;
@@ -30,19 +30,11 @@ void destroy_lobby(lobby **target) {
     *target = NULL;
 }
 
-void *start_lobby(void *params) {
-    //TODO: thread method
-    lobby *this_lobby = (lobby *) params;
-    while (this_lobby->running) {
-
-    }
-}
-
-void stop_lobby(lobby *target) {
-    target->running = 0;
-}
-
 int add_player(lobby *target, client_data *player) {
+    if((target->player_one && target->player_one->id_key == player->id_key) 
+            || (target->player_two && target->player_two->id_key == player->id_key)) {
+        return 0;
+    }
     if (!target->player_one) {
         target->player_one = player;
         return 1;
@@ -56,11 +48,11 @@ int add_player(lobby *target, client_data *player) {
 
 int remove_player(lobby *target, client_data *player) {
     if (target->player_two) {
-        target->player_two = &unoc_client;
+        target->player_two = NULL;
         return 1;
     }//success
     else if (target->player_one) {
-        target->player_one = &unoc_client;
+        target->player_one = NULL;
         return 1;
     }//success
     else return 0; //failure

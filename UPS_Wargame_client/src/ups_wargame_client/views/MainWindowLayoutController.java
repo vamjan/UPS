@@ -47,9 +47,10 @@ public class MainWindowLayoutController implements Initializable {
 
             @Override
             public void handle(ActionEvent event) {
-                String serverName = serverTF.getText();
+                String serverName = serverTF.getText(); //TODO: input control
                 String port = portTF.getText();
-                if (!ClientController.getInstance().setupConnection(serverName, Integer.parseInt(port))) {
+                String name = playerTF.getText();
+                if (!ClientController.getInstance().setupConnection(serverName, Integer.parseInt(port), name)) {
                     Alert alert = new Alert(AlertType.ERROR);
                     alert.setTitle("Connection not possible");
                     alert.setHeaderText("I was unable to connect");
@@ -58,10 +59,15 @@ public class MainWindowLayoutController implements Initializable {
                     alert.showAndWait();
                 } else {
                     try {
-                        Parent root = FXMLLoader.load(getClass().getResource("GameWindowLayout.fxml"));
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("GameWindowLayout.fxml"));
+                        Parent root = loader.load();
                         Stage stage = new Stage();
                         stage.setTitle("Wargame");
                         stage.setScene(new Scene(root));
+                        
+                        GameWindowLayoutController controller = (GameWindowLayoutController) loader.getController();
+                        controller.setPrimaryStage(stage);
+                        
                         stage.show();
                         
                         GameEngine e = new GameEngine();

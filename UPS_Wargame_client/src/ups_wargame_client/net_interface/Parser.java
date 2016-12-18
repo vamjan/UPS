@@ -49,11 +49,26 @@ public class Parser {
 
             short msgLen = Short.parseShort(tmp[1], 16);
             Object[] array = new Object[msgLen];
+
             if (msgLen > 0) {
-                for (int i = 2; i < tmp.length; i++) {
-                    array[i - 2] = tmp[i];
+                int dataCount = tmp.length - 2;
+                if (dataCount > msgLen) {
+                    dataCount = dataCount / msgLen;
+                    for(int i = 0; i < msgLen; i++) {
+                        String hlp = "";
+                        for(int j = 0; j < dataCount; j++) {
+                            hlp += tmp[2 + j + i*dataCount];
+                            hlp += "|"; //TODO: stopgap measure
+                        }
+                        array[i] = hlp;
+                    }
+                } else {
+                    for (int i = 2; i < tmp.length; i++) {
+                        array[i - 2] = tmp[i];
+                    }
                 }
             }
+
             retval = new Command(idNum, type, msgLen, array);
         } catch (Exception e) {
             System.err.println("PARSER: Message format is wrong: " + e);

@@ -20,8 +20,6 @@
 
 lobby *create_lobby(char *name);
 void destroy_lobby(lobby **target);
-void *start_lobby(void *params);
-void stop_lobby(lobby *target);
 
 int add_player(lobby *target, client_data *player);
 int remove_player(lobby *target, client_data *player);

@@ -69,9 +69,9 @@ public class ClientController implements IController {
         System.out.println("Engine setup!");
     }
 
-    public boolean setupConnection(String serverName, int serverPort) {
+    public boolean setupConnection(String serverName, int serverPort, String playerName) {
         if (commandRunner.getSocket() == null) {
-            return commandRunner.setupConnection(serverName, serverPort);
+            return commandRunner.setupConnection(serverName, serverPort, playerName);
         } else {
             return false;
         }

@@ -20,14 +20,6 @@ public class ClientOutputThread {
         streamOut = writer;
     }
 
-    public void run() {
-        /*this.start();
-
-        
-
-        System.out.println("Client run ended");*/
-    }
-
     public void handle(String msg) {
         this.write(msg);
         System.out.println("[OUT]: Sending message: " + msg);
@@ -38,7 +30,7 @@ public class ClientOutputThread {
             streamOut.write(msg);
             streamOut.flush();
         } catch (IOException ioe) {
-            System.err.println("Unable to send: " + ioe.getMessage());
+            System.err.println("[OUT]: Unable to send: " + ioe.getMessage());
         }
     }
 
@@ -52,9 +44,9 @@ public class ClientOutputThread {
                 streamOut.close();
             }
         } catch (IOException ioe) {
-            System.err.println("Error closing ..." + ioe.getMessage());
+            System.err.println("[OUT]: Error closing ..." + ioe.getMessage());
         }
-        System.out.println("Stopping output ...");
+        System.out.println("[OUT]: Stopping output ...");
     }
 
 }

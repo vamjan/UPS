@@ -54,7 +54,16 @@ public class Command {
         return String.format("%08X|%c|%04X|%s|%08X\n", this.clientID, this.type.getName(), this.length, this.dataToString(), this.clientID);
     }
 
-    public static Command createCommand() {
-        return null;
+    public static boolean requiresAck(Command c) {
+        switch(c.type) {
+            case CREATE_LOBBY:
+                return true;
+            case JOIN_LOBBY:
+                return true;
+            case LEAVE_LOBBY:
+                return true;
+            default:
+                return false;
+        }
     }
 }

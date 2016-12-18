@@ -43,9 +43,11 @@ public class ClientInputThread implements Runnable {
     }
 
     private void handle(String msg) {
-        System.out.println("[IN]: Incoming message: " + msg);
-        Command tmp = Parser.parseInput(msg);
-        ClientController.getInstance().addToInputQueue(tmp);
+        if(msg != null) {
+            System.out.println("[IN]: Incoming message: " + msg);
+            Command tmp = Parser.parseInput(msg);
+            ClientController.getInstance().addToInputQueue(tmp);
+        }
     }
 
     public void open() {

@@ -191,6 +191,12 @@ msg_type get_type(const char c) {
         case 'L':
             retval = CREATE_LOBBY;
             break;
+            case 'J':
+            retval = JOIN_LOBBY;
+            break;
+            case 'V':
+            retval = LEAVE_LOBBY;
+            break;
         case 'P':
             retval = POKE;
             break;

@@ -5,17 +5,19 @@
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="AnchorPane" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ups_wargame_client.views.GameWindowLayoutController">
+<AnchorPane fx:id="anchorPane" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ups_wargame_client.views.GameWindowLayoutController">
     <stylesheets>
         <URL value="@styles.css" />
     </stylesheets>
@@ -37,15 +39,29 @@
         </Pane>
         <Pane fx:id="lobbyPane" layoutX="14.0" layoutY="14.0" prefHeight="741.0" prefWidth="996.0">
             <children>
-                <FlowPane fx:id="lobbyInfo" layoutX="309.0" prefHeight="706.0" prefWidth="687.0" />
                 <ButtonBar fx:id="lobbyButtonBar" layoutX="309.0" layoutY="707.0" prefHeight="40.0" prefWidth="687.0">
                     <buttons>
+                        <Button fx:id="leaveLobbyButton" mnemonicParsing="false" text="Leave" />
+                        <Button fx:id="connectLobbyButton" mnemonicParsing="false" text="Connect" />
                         <Button fx:id="addLobbyButton" mnemonicParsing="false" text="Lobby" />
                         <Button fx:id="refreshButton" mnemonicParsing="false" text="Refresh" />
                         <Button fx:id="disconnectButton" mnemonicParsing="false" text="Disconnect" />
                     </buttons>
                 </ButtonBar>
-                <VBox fx:id="lobbyList" prefHeight="530.0" prefWidth="300.0" />
+                <ListView fx:id="lobbyList" prefHeight="530.0" prefWidth="300.0" />
+            <TitledPane fx:id="lobbyInfo" animated="false" layoutX="309.0" prefHeight="706.0" prefWidth="687.0" text="Lobby info">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <Label id="playerLabel" fx:id="playerOneLabel" alignment="CENTER_RIGHT" layoutX="14.0" layoutY="14.0" prefHeight="50.0" prefWidth="280.0" text="Player1" textAlignment="RIGHT" />
+                        <Label id="playerLabel" fx:id="playerTwoLabel" layoutX="397.0" layoutY="14.0" prefHeight="50.0" prefWidth="280.0" text="Player2" textAlignment="LEFT" />
+                        <Label id="vsLabel" alignment="CENTER" layoutX="293.0" layoutY="14.0" prefHeight="50.0" prefWidth="100.0" text="VS" />
+                        <Label fx:id="readyOneLabel" alignment="CENTER_RIGHT" layoutX="14.0" layoutY="64.0" prefHeight="50.0" prefWidth="280.0" text="ReadyPlayer1" />
+                        <Label fx:id="readyTwoLabel" layoutX="393.0" layoutY="64.0" prefHeight="50.0" prefWidth="280.0" text="ReadyPlayer2" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </TitledPane>
             </children>
         </Pane>
         <TabPane fx:id="chatPane" layoutY="550.0" prefHeight="220.0" prefWidth="311.0" tabClosingPolicy="UNAVAILABLE">

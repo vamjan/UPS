@@ -10,12 +10,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import ups_wargame_client.net_interface.ClientInputThread;
 import ups_wargame_client.net_interface.ClientOutputThread;
 import ups_wargame_client.net_interface.MsgType;
@@ -26,19 +23,22 @@ import ups_wargame_client.net_interface.MsgType;
  */
 public class CommandRunner {
     
+    private String playerName = null;
     private Socket clientSocket = null;
     private BufferedReader console = null;
-    
+
     private ClientController controller = null;
     private ClientOutputThread output = null;
     private ClientInputThread input = null;
     private Thread inputThread = null;
-    
+
     public CommandRunner(ClientController controller) {
         this.controller = controller;
     }
-    
+
     private boolean executeCommand(Command command, boolean lever) {
+        Command tmp;
+
         if (lever) { //incoming
             switch (command.type) {
                 case CONNECT:
@@ -47,77 +47,88 @@ public class CommandRunner {
                     controller.getView().showServerMessage("[Server]: ", command.toString()); //onlz message in the future
                     break;
                 case ACK:
-                    Command tmp = controller.retrieveAck();
+                    tmp = controller.retrieveAck();
                     if (tmp == null) {
                         System.err.println("No ACK required");
                     } else {
-                        System.out.println(tmp.toString() + " ACK");
+                        ackCommand(command);
                     }
                     break;
-                case POKE:
-                    controller.retrieveAck();
-                    break;
+                //case POKE: nuffin
+                //    break;
                 case NACK:
+                    tmp = controller.retrieveAck();
+                    if (tmp == null) {
+                        System.err.println("No ACK required");
+                    } else {
+                        nackCommand();
+                    }
                     break;
                 case GET_SERVER:
-                    controller.getView().showServerMessage("[Server]: ", command.toString());
+                    Platform.runLater(() -> {
+                        controller.getView().setLobbyList(parseServerData(command));
+                    });
                     break;
                 case CREATE_LOBBY:
                     System.out.println("I create lobby " + command.data[0]);
+                    break;
+                case JOIN_LOBBY:
+                    //lobby update
+                    break;
+                case LEAVE_LOBBY:
+                    //kick
                     break;
                 default:
                     return false;
             }
         } else { //outgoing
-            switch (command.type) {
-                case CONNECT:
-                    sendMessage(command);
-                    //controller.addToAckQueue(command);
-                    break;
-                case MESSAGE:
-                    sendMessage(command);
-                    //controller.addToAckQueue(command);
-                    break;
-                case ACK:
-                    sendMessage(command);
-                    break;
-                case NACK:
-                    sendMessage(command);
-                    //maybe some stuff
-                    break;
-                case POKE:
-                    sendMessage(command);
+            if (command.type == MsgType.DISCONNECT) {
+                Platform.runLater(() -> {
+                    controller.getView().backToStart();
+                });
+            } else {
+                sendMessage(command);
+                if (Command.requiresAck(command)) {
                     controller.addToAckQueue(command);
-                    break;
-                case GET_SERVER:
-                    sendMessage(command);
-                    //controller.addToAckQueue(command);
-                    break;
-                case CREATE_LOBBY:
-                    sendMessage(command);
-                    //controller.addToAckQueue(command);
-                    break;
-                case DISCONNECT:
-                    System.out.println("Disconnect: "+ command.hashCode());
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            controller.getView().backToStart();
-                        }
-                    });
-                    break;
-                default:
-                    return false;
+                }
             }
         }
         return true;
     }
-    
-    public boolean setupConnection(String serverName, int serverPort) {
+
+    private boolean ackCommand(Command command) {
+        switch (command.type) {
+            case CREATE_LOBBY:
+                controller.getView().acknowledge();
+                break;
+            case JOIN_LOBBY:
+                Platform.runLater(() -> {
+                    controller.getView().showLobby();
+                });
+                break;
+            case LEAVE_LOBBY:
+                Platform.runLater(() -> {
+                    controller.getView().hideLobby();
+                });
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    private void nackCommand() {
+        Platform.runLater(() -> {
+            controller.getView().refuse();
+        });
+    }
+
+    public boolean setupConnection(String serverName, int serverPort, String playerName) {
         System.out.println("Establishing connection. Please wait ...");
         try {
             clientSocket = new Socket(serverName, serverPort);
             System.out.println("Connected: " + clientSocket);
+            this.playerName = playerName;
             input = new ClientInputThread(clientSocket);
             inputThread = new Thread(input);
             output = new ClientOutputThread(new OutputStreamWriter(clientSocket.getOutputStream()));
@@ -130,41 +141,54 @@ public class CommandRunner {
         }
         return true;
     }
-    
+
     public void startConnection() {
         System.out.println("Starting connection...");
         inputThread.start();
-        executeCommand(new Command(controller.getClientID(), MsgType.CONNECT, (short) 0, null), false);
+        Object o[] = { this.playerName };
+        executeCommand(new Command(controller.getClientID(), MsgType.CONNECT, (short) 1, o), false);
     }
-    
+
     public void stopConnection() {
         System.out.println("Stopping connection...");
         input.stop();
         output.stop();
-        
+
         try {
             clientSocket.close();
             clientSocket = null;
         } catch (IOException ioe) {
             System.err.println("Unable to close socket: " + ioe.getMessage());
         }
-        
+
         input.close();
     }
-    
+
     public void runInputCommand(Command c) {
         executeCommand(c, true);
     }
-    
+
     public void runOutputCommand(Command c) {
         executeCommand(c, false);
     }
-    
+
     private void sendMessage(Command c) {
         output.handle(c.toString());
     }
-    
+
     public Socket getSocket() {
         return this.clientSocket;
+    }
+
+    private List parseServerData(Command c) {
+        List retval = new ArrayList();
+        int i;
+
+        for (i = 0; i < c.length; i++) {
+            String[] tmp = ((String) c.data[i]).split("\\|");
+            retval.add(new Lobby(Integer.parseInt(tmp[0]), (String) tmp[1])); //TODO: tady to muze spadnout
+        }
+
+        return retval;
     }
 }

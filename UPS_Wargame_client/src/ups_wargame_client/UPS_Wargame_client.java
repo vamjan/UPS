@@ -33,6 +33,12 @@ public class UPS_Wargame_client extends Application {
             System.exit(0);
         }
     }
+    
+    @Override
+    public void stop() throws Exception {
+        ClientController.getInstance().stopConnection();
+        super.stop();
+    }
 
     /**
      * @param args the command line arguments

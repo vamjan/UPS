@@ -43,6 +43,7 @@ typedef struct {
 typedef struct {
     int max_clients;
     int max_lobbies;
+    int client_count;
     int active_clients;
     int active_lobbies;
     client_data **clients;
@@ -56,10 +57,13 @@ void *start_server(void *arg);
 client_data *create_client(int fd);
 void destroy_client(client_data **client);
 void *start_client(void *arg);
-int find_client_by_fd(client_data *clients[], int fd, int max_clients);
+int find_inactive_client(client_data * clients[], int max_clients);
+int find_client_by_id(client_data * clients[], int id_key, int max_clients);
 int init_lobby(lobby *lobbies[], int max_lobbies, char *name);
-command *execute_command(command *c, client_data *client, server_data *server);
-int send_command(command *c);
+char **parse_server_data(lobby *lobbies[], int max_lobby, int active_lobby);
+command *execute_command(command *c, client_data *client, int *client_index, int *lobby_index);
+void broadcast(command *c);
+void broadcast_lobby(command *c, lobby *l);
 
 #endif /* NET_INTERFACE_H */
 
