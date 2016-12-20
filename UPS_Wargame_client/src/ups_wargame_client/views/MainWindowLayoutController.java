@@ -50,37 +50,48 @@ public class MainWindowLayoutController implements Initializable {
                 String serverName = serverTF.getText(); //TODO: input control
                 String port = portTF.getText();
                 String name = playerTF.getText();
-                if (!ClientController.getInstance().setupConnection(serverName, Integer.parseInt(port), name)) {
-                    Alert alert = new Alert(AlertType.ERROR);
-                    alert.setTitle("Connection not possible");
-                    alert.setHeaderText("I was unable to connect");
-                    alert.setContentText("I am sorry... don't close me pls :(");
+                int portNum = -1;
 
-                    alert.showAndWait();
-                } else {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("GameWindowLayout.fxml"));
-                        Parent root = loader.load();
-                        Stage stage = new Stage();
-                        stage.setTitle("Wargame");
-                        stage.setScene(new Scene(root));
-                        
-                        GameWindowLayoutController controller = (GameWindowLayoutController) loader.getController();
-                        controller.setPrimaryStage(stage);
-                        
-                        stage.show();
-                        
-                        GameEngine e = new GameEngine();
-                        ClientController.getInstance().setupEngine(e);
-                        ClientController.getInstance().startConnection();
-                        // Hide this current window
-                        ((Node) (event.getSource())).getScene().getWindow().hide();
-                    } catch (IOException ioe) {
-                        System.err.println("Error!" + ioe.getMessage());
-                        System.exit(0);
+                try {
+                    portNum = Integer.parseInt(port);
+
+                    if (!ClientController.getInstance().setupConnection(serverName, portNum, name)) {
+                        Alert alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Connection not possible");
+                        alert.setHeaderText("I was unable to connect");
+                        alert.setContentText("I am sorry... don't close me pls :(");
+
+                        alert.showAndWait();
+                    } else {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("GameWindowLayout.fxml"));
+                            Parent root = loader.load();
+                            Stage stage = new Stage();
+                            stage.setTitle("Wargame");
+                            stage.setScene(new Scene(root));
+
+                            GameWindowLayoutController controller = (GameWindowLayoutController) loader.getController();
+                            controller.setPrimaryStage(stage);
+
+                            stage.show();
+
+                            GameEngine e = new GameEngine();
+                            ClientController.getInstance().setupEngine(e);
+                            ClientController.getInstance().startConnection();
+                            // Hide this current window
+                            ((Node) (event.getSource())).getScene().getWindow().hide();
+                        } catch (IOException ioe) {
+                            System.err.println("JavaFX Error!");
+                            System.exit(0);
+                        }
                     }
+                } catch (NumberFormatException nfe) {
+                    System.err.println("Wrong port input!");
+                } catch (IllegalArgumentException iae) {
+                    System.err.println("Port number is out or range!");
                 }
             }
+
         });
 
         /*sendButton.setOnAction(new EventHandler<ActionEvent>() {

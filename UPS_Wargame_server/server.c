@@ -38,7 +38,7 @@ void *start_server(void *arg) {
     memset(&my_addr, 0, sizeof (struct sockaddr_in));
 
     my_addr.sin_family = AF_INET;
-    my_addr.sin_port = htons(10001);
+    my_addr.sin_port = htons(60001);
     my_addr.sin_addr.s_addr = INADDR_ANY;
 
     return_value = bind(server_socket, (struct sockaddr *) &my_addr, \
@@ -190,8 +190,11 @@ void *start_client(void *arg) {
             break;
         }
     }
-    //TODO: clear lobby
-    
+    /*command *retval = create_command(client->id_key, JOIN_LOBBY, 1, tmp); //used to update lobby information
+    broadcast_lobby(retval, server->lobbies[*lobby_index]);
+    destroy_command(&retval);*/
+    if(lobby_index >= 0) remove_player(server->lobbies[lobby_index], server->clients[client_index]);
+
     close(data->fd);
 
     server->active_clients--;
@@ -267,10 +270,10 @@ int init_lobby(lobby * lobbies[], int max_lobbies, char *name) {
             break;
         }
         //if() {
-            //TODO: clear server of empty lobbies
+        //TODO: clear server of empty lobbies
         //}
     }
-    
+
     return retval;
 }
 
@@ -297,7 +300,7 @@ command *execute_command(command *c, client_data *client, int *client_index, int
                 *client_index = index;
             } else {
                 client->id_key = c->id_key;
-                strncpy(client->player_name, c->data[0], sizeof(c->data[0])); //only here to enforce matching names
+                strncpy(client->player_name, c->data[0], sizeof (c->data[0])); //only here to enforce matching names
             }
             retval = create_ack(client->id_key, 1);
             break;
@@ -311,6 +314,7 @@ command *execute_command(command *c, client_data *client, int *client_index, int
                 tmp = parse_server_data(server->lobbies, server->max_lobbies, server->active_lobbies);
                 retval = create_command(client->id_key, GET_SERVER, server->active_lobbies, tmp);
                 broadcast(retval);
+                destroy_command(&retval);
                 retval = create_command(client->id_key, ACK, 0, NULL);
             } else {
                 retval = create_command(client->id_key, NACK, 0, NULL);
@@ -346,6 +350,18 @@ command *execute_command(command *c, client_data *client, int *client_index, int
                 retval = create_command(client->id_key, ACK, 0, NULL);
             } else {
                 retval = create_command(client->id_key, NACK, 0, NULL);
+            }
+            break;
+        case(TOGGLE_READY):
+            if(toggle_ready(server->lobbies[*lobby_index], client)) {
+                tmp = malloc(sizeof (char *));
+                tmp[0] = parse_lobby(server->lobbies[*lobby_index], *lobby_index);
+                retval = create_command(client->id_key, JOIN_LOBBY, 1, tmp); //used to update lobby information
+                broadcast_lobby(retval, server->lobbies[*lobby_index]);
+                destroy_command(&retval);
+                
+                if(check_ready(server->lobbies[*lobby_index]))
+                    printf("BOTH PLAYERS ARE READY\n");
             }
             break;
         case(POKE):

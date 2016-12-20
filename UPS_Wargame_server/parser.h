@@ -25,6 +25,7 @@ typedef enum {
     CREATE_LOBBY = 'L', //create lobby/lobby is created and is waiting for you
     JOIN_LOBBY = 'J', //join open lobby
     LEAVE_LOBBY = 'V', //leave open lobby/you were kicked from lobby
+    TOGGLE_READY = 'T',
     POKE = 'P'
 } msg_type;
 

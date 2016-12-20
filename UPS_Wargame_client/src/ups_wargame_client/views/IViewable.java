@@ -6,6 +6,7 @@
 package ups_wargame_client.views;
 
 import java.util.List;
+import ups_wargame_client.control.Lobby;
 
 /**
  *
@@ -17,7 +18,9 @@ public interface IViewable {
     public void backToStart();
     public void setLobbyList(List list);
     public void showLobby();
+    public void updateLobby(Lobby lobby);
     public void hideLobby();
+    public void toggleConnected();
     public void refuse();
     public void acknowledge();
 }

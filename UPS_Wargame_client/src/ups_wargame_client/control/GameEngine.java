@@ -27,13 +27,12 @@ public class GameEngine implements Runnable {
     public void run() {
         Command input = null;
         Command output = null;
-
+        long currentTime = System.currentTimeMillis();
+        
         while (running) {
             input = controller.retrieveInput();
             output = controller.retrieveOutput();
-            long currentTime = System.currentTimeMillis();
             while (input == null && output == null) {
-                this.block();
                 if (System.currentTimeMillis() >= (currentTime + TIMEOUT)) {
                     System.err.println("[ENGINE]: Timed out!");
                     if (out >= 5) {
@@ -46,16 +45,17 @@ public class GameEngine implements Runnable {
                     controller.sendCommand(new Command(controller.getClientID(), MsgType.POKE, (short) 0, null));
                     out++;
                 }
+                this.block();
                 input = controller.retrieveInput();
                 output = controller.retrieveOutput();
             }
 
             if (output != null) {
-                System.out.println("[ENGINE]: Working on output: " + output);
+                System.out.print("[ENGINE]: Working on output: " + output);
                 controller.sendCommand(output);
             }
             if (input != null) {
-                System.out.println("[ENGINE]: Working on input: " + input);
+                System.out.print("[ENGINE]: Working on input: " + input);
                 controller.recieveCommand(input);
                 currentTime = System.currentTimeMillis();
                 out = 0;
@@ -88,7 +88,7 @@ public class GameEngine implements Runnable {
                 this.wait(TIMEOUT);
             }
         } catch (InterruptedException ie) {
-            System.err.println("Engine exception!");
+            System.err.println("[ENGINE]: Engine blocking exception!");
         }
     }
 

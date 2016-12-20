@@ -36,7 +36,7 @@ public class ClientInputThread implements Runnable {
                 String tmp = streamIn.readLine();
                 this.handle(tmp);
             } catch (IOException ioe) {
-                System.out.println("Listening error: " + ioe.getMessage());
+                System.err.println("[IN]: Listening error: " + ioe.getMessage());
             }
         }
         System.out.println("Input thread stopped ...");
@@ -44,7 +44,7 @@ public class ClientInputThread implements Runnable {
 
     private void handle(String msg) {
         if(msg != null) {
-            System.out.println("[IN]: Incoming message: " + msg);
+            //System.out.println("[IN]: Incoming message: " + msg);
             Command tmp = Parser.parseInput(msg);
             ClientController.getInstance().addToInputQueue(tmp);
         }
@@ -54,7 +54,7 @@ public class ClientInputThread implements Runnable {
         try {
             streamIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException ioe) {
-            System.out.println("Error getting input stream: " + ioe);
+            System.err.println("[IN]: Error getting input stream: " + ioe);
         }
     }
 
@@ -64,7 +64,7 @@ public class ClientInputThread implements Runnable {
                 streamIn.close();
             }
         } catch (IOException ioe) {
-            System.out.println("Error closing input stream: " + ioe);
+            System.err.println("[IN]: Error closing input stream: " + ioe);
         }
     }
 

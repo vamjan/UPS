@@ -33,7 +33,9 @@ typedef struct {
 typedef struct {
     client_data *player_one;
     client_data *player_two;
-    client_data *on_turn;
+    int ready_one;
+    int ready_two;
+    unit *on_turn;
     int game_in_progress;
     int running;
     playfield *pf;

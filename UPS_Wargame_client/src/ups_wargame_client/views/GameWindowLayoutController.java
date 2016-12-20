@@ -8,6 +8,7 @@ package ups_wargame_client.views;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,6 +26,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -66,6 +68,8 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     private Button connectLobbyButton;
     @FXML
     private Button leaveLobbyButton;
+    @FXML
+    private Button readyButton;
 
     @FXML
     private TextArea serverChatTextArea;
@@ -111,8 +115,17 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         addLobbyButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                Object o[] = {"LOBBYNAME"};
-                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.CREATE_LOBBY, (short) 1, o));
+                TextInputDialog dialog = new TextInputDialog("Lobby name");
+                dialog.setTitle("Create lobby");
+                dialog.setHeaderText("Lobby creation window");
+                dialog.setContentText("Please enter lobby name:");
+
+                // Traditional way to get the response value.
+                Optional<String> result = dialog.showAndWait();
+                if (result.isPresent()) {
+                    Object o[] = {result.get()};
+                    controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.CREATE_LOBBY, (short) 1, o));
+                }
             }
         });
 
@@ -136,6 +149,13 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                     controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.LEAVE_LOBBY, (short) 1, o));
                     selectedLobby = null; //TODO: might be a problem
                 }
+            }
+        });
+
+        readyButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.TOGGLE_READY, (short) 0, null));
             }
         });
     }
@@ -177,12 +197,34 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     public void showLobby() {
         lobbyInfo.setExpanded(true);
         playerOneLabel.setText(selectedLobby.getPlayerOne());
+        readyOneLabel.setText(selectedLobby.getReadyOne() ? "READY" : "NOT READY");
         playerTwoLabel.setText(selectedLobby.getPlayerTwo());
+        readyTwoLabel.setText(selectedLobby.getReadyTwo() ? "READY" : "NOT READY");
+    }
+
+    @Override
+    public void updateLobby(Lobby lobby) {
+        this.selectedLobby.setPlayerOne(lobby.getPlayerOne());
+        this.selectedLobby.setReadyOne(lobby.getReadyOne());
+        this.selectedLobby.setPlayerTwo(lobby.getPlayerTwo());
+        this.selectedLobby.setReadyTwo(lobby.getReadyTwo());
+        this.showLobby();
     }
 
     @Override
     public void hideLobby() {
         lobbyInfo.setExpanded(false);
+    }
+
+    @Override
+    public void toggleConnected() {
+        boolean isConnected = !leaveLobbyButton.isVisible();
+        connectLobbyButton.setVisible(!isConnected);
+        leaveLobbyButton.setVisible(isConnected);
+        readyButton.setVisible(isConnected);
+        connectLobbyButton.setManaged(!isConnected);
+        leaveLobbyButton.setManaged(isConnected);
+        readyButton.setManaged(isConnected);
     }
 
     @Override

@@ -51,7 +51,7 @@ public class CommandRunner {
                     if (tmp == null) {
                         System.err.println("No ACK required");
                     } else {
-                        ackCommand(command);
+                        ackCommand(tmp);
                     }
                     break;
                 //case POKE: nuffin
@@ -70,10 +70,11 @@ public class CommandRunner {
                     });
                     break;
                 case CREATE_LOBBY:
-                    System.out.println("I create lobby " + command.data[0]);
                     break;
                 case JOIN_LOBBY:
-                    //lobby update
+                    Platform.runLater(() -> {
+                        controller.getView().updateLobby((Lobby)parseServerData(command).get(0));
+                    });
                     break;
                 case LEAVE_LOBBY:
                     //kick
@@ -104,11 +105,13 @@ public class CommandRunner {
             case JOIN_LOBBY:
                 Platform.runLater(() -> {
                     controller.getView().showLobby();
+                    controller.getView().toggleConnected();
                 });
                 break;
             case LEAVE_LOBBY:
                 Platform.runLater(() -> {
                     controller.getView().hideLobby();
+                    controller.getView().toggleConnected();
                 });
                 break;
             default:
@@ -182,11 +185,10 @@ public class CommandRunner {
 
     private List parseServerData(Command c) {
         List retval = new ArrayList();
-        int i;
-
-        for (i = 0; i < c.length; i++) {
+        
+        for (int i = 0; i < c.length; i++) {
             String[] tmp = ((String) c.data[i]).split("\\|");
-            retval.add(new Lobby(Integer.parseInt(tmp[0]), (String) tmp[1])); //TODO: tady to muze spadnout
+            retval.add(Lobby.parseLobby(tmp)); 
         }
 
         return retval;
