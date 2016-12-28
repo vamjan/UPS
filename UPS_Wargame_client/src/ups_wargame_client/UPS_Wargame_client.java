@@ -42,29 +42,10 @@ public class UPS_Wargame_client extends Application {
 
     /**
      * @param args the command line arguments
+     * @throws java.lang.InterruptedException
      */
     public static void main(String[] args) throws InterruptedException {
         ClientController.getInstance();
         launch(args);
     }
-
-    /*static final String AB = "0123456789ABCDEFabcdef|";
-    static SecureRandom rnd = new SecureRandom();
-
-    private static String randomString(int len) {
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            sb.append(AB.charAt(rnd.nextInt(AB.length())));
-        }
-        return sb.toString();
-    }*/
-
-    /*public static void main(String args[]) {
-        //ClientOutputThread client = new ClientOutputThread();
-        Command c = new Command(-6565121, MsgType.ATTACK, (short)5, 1, 2, 3, 4);
-        System.out.println(c);
-        
-        c = Parser.parseInput(c.toString());
-        System.out.println(c);
-    }  */
 }
