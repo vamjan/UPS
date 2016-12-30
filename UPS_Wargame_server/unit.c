@@ -17,8 +17,9 @@ unit *create_unit(int coord_x, int coord_z, unittype type, allegiance al, short 
     tmp->coord_x = coord_x;
     tmp->coord_z = coord_z;
     tmp->type = type;
-    tmp->al = NEUTRAL;
+    tmp->al = al;
     tmp->ID = ID;
+    tmp->dead = 1;
     
     return tmp;
 }
@@ -26,7 +27,7 @@ unit *create_unit(int coord_x, int coord_z, unittype type, allegiance al, short 
 int destroy_unit(unit **u) {
     logger("INFO", "Destroying unit");
     
-    if((*u)->ID == 0) {
+    if(!(*u)) {
         logger("WARN", "Unit is empty and can't be destroyed");
         return 0;
     }
@@ -54,6 +55,4 @@ int deal_damage(unit *target, short amount) {
 int move_unit(unit *target, int coord_x, int coord_z) {
     target->coord_x = coord_x;
     target->coord_z = coord_z;
-    
-    //send some network stuff
 }

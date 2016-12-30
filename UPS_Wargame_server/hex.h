@@ -14,7 +14,8 @@
 #ifndef HEX_H
 #define HEX_H
 
-#define UNIT_ARRAY 100
+#define UNIT_ARRAY 17
+#define ROUND_COUNT 5
 #define DEFAULT_ROWS 10
 #define DEFAULT_COLS 15
 
@@ -48,13 +49,13 @@ typedef struct {
     unit** units;
     int rows;
     int columns;
-    unit *on_turn;
+    int on_turn;
     int score_one;
     int score_two;
 } playfield;
 //#pragma pack()
 
-static char default_map[DEFAULT_ROWS][DEFAULT_COLS] = {
+static const char default_map[DEFAULT_ROWS][DEFAULT_COLS] = {
     {'D', 'D', 'D', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'},
     {'D', 'D', 'D', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'},
     {'G', 'D', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'},
@@ -65,28 +66,25 @@ static char default_map[DEFAULT_ROWS][DEFAULT_COLS] = {
     {'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'D', 'G'},
     {'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'D', 'D', 'D'},
     {'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'D', 'D', 'D'},
-};
-
-//static int default_units[17][2] = { {1, 5}, {2, 5}, {3, 5}, {3, 6}, {1, 6}, {2, 7}, {2, 6}, 
-//                                    {13, -3}, {12, -3}, {11, -3}, {11, -4}, {13, -4}, {12, -5}, {12, -4},
-//                                    {4, -1}, {7, 0}, {11, 1} };
+};                                 
 
 static const unit default_units[] = {
-    {0, INFANTRY, BLU, 10, 5, 2, 1, 0, 1, 5},
-    {1, INFANTRY, BLU, 10, 5, 2, 1, 0, 2, 5},
-    {2, INFANTRY, BLU, 10, 5, 2, 1, 0, 3, 5},
-    {3, INFANTRY, BLU, 10, 5, 2, 1, 0, 3, 6},
-    {4, TANK, BLU, 30, 10, 4, 3, 0, 1, 6},
-    {5, TANK, BLU, 30, 10, 4, 3, 0, 2, 7},
-    {6, SPG, BLU, 15, 12, 2, 5, 0, 2, 6},
+    {4, TANK, BLU, 30, 10, 4, 3, 1, 1, 6},
+    {11, TANK, RED, 30, 10, 4, 3, 1, 13, -4},
+    {5, TANK, BLU, 30, 10, 4, 3, 1, 2, 7},
+    {12, TANK, RED, 30, 10, 4, 3, 1, 12, -5},
     
-    {7, INFANTRY, RED, 10, 5, 2, 1, 0, 13, -3},
-    {8, INFANTRY, RED, 10, 5, 2, 1, 0, 12, -3},
-    {9, INFANTRY, RED, 10, 5, 2, 1, 0, 11, -3},
-    {10, INFANTRY, RED, 10, 5, 2, 1, 0, 11, -4},
-    {11, TANK, RED, 30, 10, 4, 3, 0, 13, -4},
-    {12, TANK, RED, 30, 10, 4, 3, 0, 12, -5},
-    {13, SPG, RED, 15, 12, 2, 5, 0, 12, -4},
+    {7, INFANTRY, RED, 10, 5, 2, 1, 1, 13, -3},
+    {0, INFANTRY, BLU, 10, 5, 2, 1, 1, 1, 5},
+    {8, INFANTRY, RED, 10, 5, 2, 1, 1, 12, -3},
+    {1, INFANTRY, BLU, 10, 5, 2, 1, 1, 2, 5},
+    {9, INFANTRY, RED, 10, 5, 2, 1, 1, 11, -3},
+    {2, INFANTRY, BLU, 10, 5, 2, 1, 1, 3, 5},
+    {10, INFANTRY, RED, 10, 5, 2, 1, 1, 11, -4},
+    {3, INFANTRY, BLU, 10, 5, 2, 1, 1, 3, 6},
+    
+    {6, SPG, BLU, 15, 12, 2, 5, 1, 2, 6},
+    {13, SPG, RED, 15, 12, 2, 5, 1, 12, -4},
     
     {14, FLAG, NEUTRAL, 1, 1, 0, 0, 0, 4, -1},
     {15, FLAG, NEUTRAL, 1, 1, 0, 0, 0, 7, 0},
@@ -104,6 +102,9 @@ int clear_playfield(playfield *pf);
 int destroy_playfield(playfield **pf);
 void print_playfield(playfield *pf);
 char **parse_map(playfield *pf);
+
+//GAME
+unit *next_turn(playfield *pf);
 
 //
 //UNIT MANAGEMENT

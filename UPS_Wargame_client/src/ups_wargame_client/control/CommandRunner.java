@@ -91,6 +91,11 @@ public class CommandRunner {
                 case UPDATE:
                     this.updateScore(command);
                     break;
+                case SKIP:
+                    break;
+                case END:
+                    controller.getView().endGame();
+                    break;
                 default:
                     return false;
             }
@@ -224,7 +229,8 @@ public class CommandRunner {
                     (String)c.data[1],
                     Integer.parseInt((String)c.data[2]),
                     Integer.parseInt((String)c.data[3]),
-                    ((String)c.data[4]).charAt(0));
+                    Integer.parseInt((String)c.data[4]),
+                    ((String)c.data[5]).charAt(0));
         } catch(NumberFormatException | ClassCastException nfe) {
             System.err.println("I can't work with this: " + c);
         }

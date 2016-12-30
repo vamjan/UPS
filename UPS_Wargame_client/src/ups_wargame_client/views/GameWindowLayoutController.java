@@ -113,7 +113,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     private Canvas canvasField;
 
     private GameData gd = null;
-    private Image[] cachedImages = new Image[9];
+    private final Image[] cachedImages = new Image[9];
     private int lastI = 0, lastJ = 0;
 
     /**
@@ -140,13 +140,11 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         double offsetX = 75;
         double offsetY = 200;
 
-        gd = new GameData();
-
         double startX = offsetX;
         double endX = canvasMap.getWidth() - offsetX;
         double startY = offsetY;
         double endY = canvasMap.getHeight() - offsetY;
-        double horizonstalDistance = (endX - startX) / gd.getPlayField().getColumns();
+        double horizonstalDistance = (endX - startX) / 15; //HACK: musi se zjistit pri startu
         double hexSize = horizonstalDistance / 0.75;
         double verticalDistance = 0.86603 * hexSize; //sqrt(3)/2*hexsize
 
@@ -189,7 +187,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         connectLobbyButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                Lobby tmp = null;
+                Lobby tmp;
                 if ((tmp = (Lobby) lobbyList.getSelectionModel().getSelectedItem()) != null) {
                     Object o[] = {tmp.getIndex()};
                     controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.JOIN_LOBBY, (short) 1, o));
@@ -219,7 +217,14 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         concedeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                endGame();
+                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.END, (short) 0, null));
+            }
+        });
+        
+        skipButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.SKIP, (short) 0, null));
             }
         });
         
@@ -267,8 +272,6 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         gamePane.visibleProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                
-                System.out.println(gd.getPlayField().getHex(0, 0));
                 if(newValue) {
                     drawMap(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize);
                     drawUnits(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize/1.5);
@@ -384,8 +387,8 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     }
     
     @Override
-    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, char player) {
-        this.gd.updateScore(playerBlu, playerRed, scoreBlu, scoreRed, player);
+    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int unitID, char player) {
+        this.gd.updateScore(playerBlu, playerRed, scoreBlu, scoreRed, unitID, player);
         this.drawScore();
     }
     

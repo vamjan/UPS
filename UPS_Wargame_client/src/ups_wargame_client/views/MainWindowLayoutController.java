@@ -8,6 +8,9 @@ package ups_wargame_client.views;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.UnaryOperator;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -81,7 +84,7 @@ public class MainWindowLayoutController implements Initializable {
                             // Hide this current window
                             ((Node) (event.getSource())).getScene().getWindow().hide();
                         } catch (IOException ioe) {
-                            System.err.println("JavaFX Error!");
+                            System.err.println("JavaFX Error! " + ioe);
                             System.exit(0);
                         }
                     }
@@ -92,25 +95,14 @@ public class MainWindowLayoutController implements Initializable {
                 }
             }
         });
-
-
-        /*Timeline secondsWonder = new Timeline(new KeyFrame(Duration.seconds(0.5), new EventHandler<ActionEvent>() {
+        
+        playerTF.textProperty().addListener(new ChangeListener<String>() {
             @Override
-            public void handle(ActionEvent event) {
-                for (Unit val : gd.getUnits()) {
-                    int row = Playfield.convertRow(val.getCoordX(), val.getCoordZ());
-                    int col = val.getCoordZ();
-                    
-                    col = (col+1)%gd.getPlayField().getColumns();
-                    
-                    val.setCoordX(Playfield.getRow(row, col));
-                    val.setCoordZ(col);
-                    
-                    drawUnits(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize / 1.5);
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if(newValue.length() > 30) {
+                    playerTF.setText(oldValue);
                 }
             }
-        }));
-        secondsWonder.setCycleCount(Timeline.INDEFINITE);
-        secondsWonder.play();*/
+        });
     }
 }

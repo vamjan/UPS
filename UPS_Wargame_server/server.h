@@ -66,5 +66,8 @@ command *execute_command(command *c, client_data *client, int *client_index, int
 void broadcast(command *c);
 void broadcast_lobby(command *c, lobby *l);
 
+char **parse_game_info(lobby *l, client_data *c);
+void turn_update(command *c, lobby *l);
+
 #endif /* NET_INTERFACE_H */
 

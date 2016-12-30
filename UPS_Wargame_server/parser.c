@@ -51,6 +51,7 @@ int destroy_command(command **command) {
             free((*command)->data[i]);
         }
         free((*command)->data);
+        (*command)->data = NULL;
     }
     free(*command);
     *command = NULL;
@@ -214,6 +215,21 @@ msg_type get_type(const char c) {
             break;
         case 'I':
             retval = UNITS;
+            break;
+        case 'E':
+            retval = END;
+            break;
+        case 'O':
+            retval = MOVE;
+            break;
+        case 'A':
+            retval = ATTACK;
+            break;
+        case 'Z':
+            retval = CAPTURE;
+            break;
+        case 'K':
+            retval = SKIP;
             break;
         case 'P':
             retval = POKE;

@@ -23,9 +23,8 @@ public enum MsgType {
     END('E'), //server or client ended the game session
     MOVE('O'), //move unit from [X1, Y1] to [X2, Y2]
     ATTACK('A'), //unit A attacks unit B for X dmg
-    CAPTURE('Z'), //unit A captured zone Z
+    CAPTURE('Z'), //unit A captured unit Z
     SKIP('K'), //player skips action
-    TURN('N'), //turn score update
     
     GET_LOBBY('G'), //get available lobby data
     CREATE_LOBBY('L'), //create lobby/lobby is created and is waiting for you

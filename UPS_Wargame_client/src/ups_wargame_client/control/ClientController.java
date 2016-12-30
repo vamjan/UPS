@@ -47,10 +47,10 @@ public class ClientController implements IController {
     }
 
     public static ClientController getInstance() {
-        //System.out.println("YOU GET AN INSTANCE " + instance.hashCode());
         if (instance != null) {
             return instance;
         } else {
+            System.out.println("Neni");
             return null;
         }
     }

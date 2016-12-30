@@ -19,7 +19,7 @@ public class GameData implements IGameData {
     private Playfield playfield = null;
     private List<Unit> units = null;
 
-    private int onTurnIndex;
+    private Unit onTurn = null;
     private String playerBlue = null;
     private String playerRed = null;
     private int blueScore;
@@ -75,7 +75,6 @@ public class GameData implements IGameData {
         tmp.setAllegiance('R');
         this.units.add(tmp);*/
 
-        this.onTurnIndex = 0;
     }
 
     public GameData(int rows, int cols, char[][] map) {
@@ -83,29 +82,31 @@ public class GameData implements IGameData {
         this.playfield.setMap(map);
     }
     
-    public void updateScore(String playerBlu, String playerRed, int scoreBlu, int scoreRed, char player) {
+    public void updateScore(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int onTurnID, char player) {
         this.playerBlue = playerBlu;
         this.playerRed = playerRed;
         this.blueScore = scoreBlu;
         this.redScore = scoreRed;
         this.userAllegiance = player;
+        this.onTurn = getUnitByID(onTurnID);
     }
 
     public Unit getUnitOnTurn() {
-        return units.get(onTurnIndex % units.size());
+        return this.onTurn;
     }
     
     public Unit incrementTurn() {
-        Unit retval = null;
+        /*Unit retval = null;
         onTurnIndex++;
         while ((retval = units.get(onTurnIndex % units.size())).getType() == 'F') {
             onTurnIndex++;
         }
-        return retval;
+        return retval;*/
+        return null;
     }
 
     public boolean playerOnTurn(char al) {
-        return getUnits().get(onTurnIndex % getUnits().size()).getAllegiance() == al;
+        return this.onTurn.getAllegiance() == al;
     }
 
     public boolean checkOccupied(int r, int q) {

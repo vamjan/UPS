@@ -7,7 +7,6 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
@@ -43,8 +42,8 @@
             <children>
                 <ButtonBar fx:id="lobbyButtonBar" layoutX="309.0" layoutY="707.0" prefHeight="40.0" prefWidth="687.0">
                     <buttons>
-                        <Button fx:id="readyButton" visible="false" mnemonicParsing="false" text="Ready" />
-                        <Button fx:id="leaveLobbyButton" visible="false" mnemonicParsing="false" text="Leave" />
+                        <Button fx:id="readyButton" mnemonicParsing="false" text="Ready" visible="false" />
+                        <Button fx:id="leaveLobbyButton" mnemonicParsing="false" text="Leave" visible="false" />
                         <Button fx:id="connectLobbyButton" mnemonicParsing="false" text="Connect" />
                         <Button fx:id="addLobbyButton" mnemonicParsing="false" text="Lobby" />
                         <Button fx:id="refreshButton" mnemonicParsing="false" text="Refresh" />
@@ -58,7 +57,7 @@
                      <children>
                         <Label id="playerLabel" fx:id="playerOneLabel" alignment="CENTER_RIGHT" layoutX="14.0" layoutY="14.0" prefHeight="50.0" prefWidth="280.0" text="Player1" textAlignment="RIGHT" />
                         <Label id="playerLabel" fx:id="playerTwoLabel" layoutX="397.0" layoutY="14.0" prefHeight="50.0" prefWidth="280.0" text="Player2" textAlignment="LEFT" />
-                        <Label id="vsLabel" alignment="CENTER" layoutX="293.0" layoutY="14.0" prefHeight="50.0" prefWidth="100.0" text="VS" />
+                        <Label id="vsLabel" alignment="CENTER" layoutX="293.0" layoutY="28.0" prefHeight="50.0" prefWidth="100.0" text="VS" />
                         <Label fx:id="readyOneLabel" alignment="CENTER_RIGHT" layoutX="14.0" layoutY="64.0" prefHeight="50.0" prefWidth="280.0" text="ReadyPlayer1" />
                         <Label fx:id="readyTwoLabel" layoutX="393.0" layoutY="64.0" prefHeight="50.0" prefWidth="280.0" text="ReadyPlayer2" />
                      </children>

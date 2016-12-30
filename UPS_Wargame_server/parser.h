@@ -29,7 +29,11 @@ typedef enum {
     START = 'S',
     UNITS = 'I',
     UPDATE = 'U',
-    END = 'E',
+    END = 'E', //server or client ended the game session
+    MOVE = 'O', //move unit from [X1, Y1] to [X2, Y2]
+    ATTACK = 'A', //unit A attacks unit B for X dmg
+    CAPTURE = 'Z', //unit A captured unit Z
+    SKIP = 'K', //player skips action
     POKE = 'P'
 } msg_type;
 

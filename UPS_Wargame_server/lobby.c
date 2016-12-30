@@ -19,7 +19,6 @@ lobby *create_lobby(char *name) {
     strncpy(retval->lobby_name, name, NAME_LENGTH);
     retval->running = 0;
     retval->game_in_progress = 0;
-    retval->pf = create_playfield(DEFAULT_ROWS, DEFAULT_COLS);
 
     return retval;
 }
@@ -107,4 +106,10 @@ int check_ready(lobby *target) {
         return 1;
     }//success
     else return 0; //failure
+}
+
+int reset_lobby(lobby *target) {
+    //if(target->pf)
+    //    destroy_playfield(&(target->pf));
+    target->pf = create_playfield(DEFAULT_ROWS, DEFAULT_COLS);
 }

@@ -37,11 +37,11 @@ playfield *create_playfield(int rows, int columns) {
     }
 
     pf->units = malloc(sizeof (unit *) * UNIT_ARRAY);
-    
-    pf->on_turn = NULL;
+
+    pf->on_turn = 0;
     pf->score_one = 0;
     pf->score_two = 0;
-    
+
     return pf;
 }
 
@@ -52,10 +52,10 @@ int create_hex_map(playfield *pf) {
             pf->terain[i][j] = default_map[i][j];
         }
     }
-    
-    for(i = 0; i < 17; i++) {
-        unit *tmp = malloc(sizeof(unit));
-        memcpy(tmp, &default_units[i], sizeof(unit));
+
+    for (i = 0; i < 17; i++) {
+        unit *tmp = malloc(sizeof (unit));
+        memcpy(tmp, &default_units[i], sizeof (unit));
         add_unit(pf, tmp);
     }
 }
@@ -103,8 +103,6 @@ int clear_playfield(playfield *pf) {
         memset(pf->terain[i], 0, sizeof (char)*pf->columns);
 
     for (i = 0; i < UNIT_ARRAY; i++) {
-        //memset(pf->units[i], 0, sizeof(unit));
-        //pf->units[i] = &empty;
         destroy_unit(&pf->units[i]);
     }
 
@@ -127,10 +125,6 @@ int destroy_playfield(playfield **pf) {
             free((*pf)->terain[i]);
         }
 
-        /*for(i = 0; i < UNIT_ARRAY; i++) { not neccesary
-            destroy_unit(&(*pf)->units[i]);
-        }*/
-
         free((*pf)->terain);
         free((*pf)->units); //TODO: memory leak
         free(*pf);
@@ -138,6 +132,22 @@ int destroy_playfield(playfield **pf) {
 
         return 1;
     }
+}
+
+unit *next_turn(playfield *pf) {
+    unit *retval = NULL;
+
+    do {
+        retval = pf->units[pf->on_turn++ % 17];
+        if (retval->type == FLAG && retval->al != NEUTRAL)
+            (retval->al == BLU) ? pf->score_one++ : pf->score_two++;
+        if (pf->on_turn >= UNIT_ARRAY * ROUND_COUNT) {
+            retval = NULL;
+            break;
+        }
+    } while (retval->type == FLAG || retval->dead);
+
+    return retval;
 }
 
 void print_playfield(playfield *pf) {

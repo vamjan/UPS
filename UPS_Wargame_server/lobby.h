@@ -30,6 +30,7 @@ char *parse_lobby(lobby *target, int index);
 int toggle_ready(lobby *target, client_data *player);
 int check_ready(lobby *target);
 int start_game(lobby *target);
+int reset_lobby(lobby *target);
 
 #endif /* LOBBY_H */
 

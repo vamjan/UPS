@@ -16,9 +16,9 @@
         <Label layoutX="161.0" layoutY="164.0" text="Player Name:" />
         <Label layoutX="206.0" layoutY="192.0" text="Server:" />
         <Label layoutX="223.0" layoutY="219.0" text="Port:" />
-        <TextField fx:id="playerTF" layoutX="263.0" layoutY="159.0" promptText="Honza" text="Honza" />
-        <TextField fx:id="serverTF" layoutX="263.0" layoutY="188.0" promptText="127.0.0.1" text="127.0.0.1" />
-        <TextField fx:id="portTF" layoutX="263.0" layoutY="215.0" promptText="10001" text="10001" />
+        <TextField fx:id="playerTF" layoutX="263.0" layoutY="159.0" prefWidth="200" promptText="Enter name. Max 30 chars." text="USER" />
+        <TextField fx:id="serverTF" layoutX="263.0" layoutY="188.0" prefWidth="200" promptText="Enter server adress." text="127.0.0.1" />
+        <TextField fx:id="portTF" layoutX="263.0" layoutY="215.0" prefWidth="200" promptText="Enter server port." text="60001" />
         <Text layoutX="169.0" layoutY="144.0" strokeType="OUTSIDE" strokeWidth="0.0" text="WELCOME TO THIS SHIT" textAlignment="CENTER">
             <font>
                 <Font size="20.0" />

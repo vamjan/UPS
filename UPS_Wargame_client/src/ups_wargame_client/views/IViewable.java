@@ -26,7 +26,7 @@ public interface IViewable {
     public void acknowledge();
     public void setupGameData(int rows, String[] map);
     public void setUnits(List list);
-    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, char player);
+    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int unitID, char player);
     public void startGame();
     public void endGame();
     public IGameData getGameData();
