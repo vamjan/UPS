@@ -19,7 +19,7 @@ lobby *create_lobby(char *name) {
     strncpy(retval->lobby_name, name, NAME_LENGTH);
     retval->running = 0;
     retval->game_in_progress = 0;
-    //retval->pf = create_playfield(DEFAULT_COLS, DEFAULT_ROWS);
+    retval->pf = create_playfield(DEFAULT_ROWS, DEFAULT_COLS);
 
     return retval;
 }

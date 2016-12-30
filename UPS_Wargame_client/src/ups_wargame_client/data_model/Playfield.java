@@ -74,7 +74,7 @@ public class Playfield {
             return false;
         }
     }
-
+    
     public static int getRow(int i, int j) {
         return i - (j + 1) / 2;
     }

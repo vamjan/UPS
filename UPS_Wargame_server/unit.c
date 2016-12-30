@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-unit *create_unit(int coord_x, int coord_z, unittype type, short ID) {
+unit *create_unit(int coord_x, int coord_z, unittype type, allegiance al, short ID) {
     unit *tmp = malloc(sizeof(unit));
     
     logger("INFO", "Creating unit");

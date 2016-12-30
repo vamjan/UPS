@@ -13,11 +13,11 @@ import ups_wargame_client.net_interface.MsgType;
  */
 public class GameEngine implements Runnable {
 
-    final long TIMEOUT = 1000;
+    final long TIMEOUT = 1500;
 
     private ClientController controller = null;
     private boolean running = true;
-    private int out = 0, test = 0;
+    private int out = 0;
 
     public GameEngine() {
         controller = ClientController.getInstance();

@@ -34,7 +34,10 @@ public class Command {
         this.length = 0;
         this.data = new Object[0];
     }
-
+    /**
+     * 
+     * @return 
+     */
     public String dataToString() {
         String retval = "";
         if (this.length > 0) {

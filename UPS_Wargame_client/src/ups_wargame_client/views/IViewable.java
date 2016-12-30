@@ -7,6 +7,7 @@ package ups_wargame_client.views;
 
 import java.util.List;
 import ups_wargame_client.control.Lobby;
+import ups_wargame_client.data_model.IGameData;
 
 /**
  *
@@ -23,4 +24,10 @@ public interface IViewable {
     public void toggleConnected();
     public void refuse();
     public void acknowledge();
+    public void setupGameData(int rows, String[] map);
+    public void setUnits(List list);
+    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, char player);
+    public void startGame();
+    public void endGame();
+    public IGameData getGameData();
 }

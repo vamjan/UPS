@@ -11,8 +11,10 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javafx.application.Platform;
+import ups_wargame_client.data_model.Unit;
 import ups_wargame_client.net_interface.ClientInputThread;
 import ups_wargame_client.net_interface.ClientOutputThread;
 import ups_wargame_client.net_interface.MsgType;
@@ -22,7 +24,7 @@ import ups_wargame_client.net_interface.MsgType;
  * @author sini
  */
 public class CommandRunner {
-    
+
     private String playerName = null;
     private Socket clientSocket = null;
     private BufferedReader console = null;
@@ -73,11 +75,21 @@ public class CommandRunner {
                     break;
                 case JOIN_LOBBY:
                     Platform.runLater(() -> {
-                        controller.getView().updateLobby((Lobby)parseServerData(command).get(0));
+                        controller.getView().updateLobby((Lobby) parseServerData(command).get(0));
                     });
                     break;
                 case LEAVE_LOBBY:
                     //kick
+                    break;
+                case START:
+                    String[] stringArray = Arrays.copyOf(command.data, command.data.length, String[].class);
+                    controller.getView().setupGameData(command.length, stringArray);
+                    break;
+                case UNITS:
+                    controller.getView().setUnits(parseUnits(command));
+                    break;
+                case UPDATE:
+                    this.updateScore(command);
                     break;
                 default:
                     return false;
@@ -148,7 +160,7 @@ public class CommandRunner {
     public void startConnection() {
         System.out.println("Starting connection...");
         inputThread.start();
-        Object o[] = { this.playerName };
+        Object o[] = {this.playerName};
         executeCommand(new Command(controller.getClientID(), MsgType.CONNECT, (short) 1, o), false);
     }
 
@@ -185,12 +197,36 @@ public class CommandRunner {
 
     private List parseServerData(Command c) {
         List retval = new ArrayList();
-        
+
         for (int i = 0; i < c.length; i++) {
             String[] tmp = ((String) c.data[i]).split("\\|");
-            retval.add(Lobby.parseLobby(tmp)); 
+            retval.add(Lobby.parseLobby(tmp));
         }
 
         return retval;
+    }
+
+    private List parseUnits(Command c) {
+        List retval = new ArrayList();
+        
+        for (int i = 0; i < c.length; i++) {
+            String[] tmp = ((String) c.data[i]).split("\\|");
+            retval.add(Unit.parseUnit(tmp));
+        }
+
+        return retval;
+    }
+    
+    private void updateScore(Command c) {
+        try{
+            controller.getView().updatePlayers(
+                    (String)c.data[0],
+                    (String)c.data[1],
+                    Integer.parseInt((String)c.data[2]),
+                    Integer.parseInt((String)c.data[3]),
+                    ((String)c.data[4]).charAt(0));
+        } catch(NumberFormatException | ClassCastException nfe) {
+            System.err.println("I can't work with this: " + c);
+        }
     }
 }

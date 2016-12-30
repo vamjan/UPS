@@ -60,6 +60,7 @@ public class Parser {
                             hlp += tmp[2 + j + i*dataCount];
                             hlp += "|"; //TODO: stopgap measure
                         }
+                        hlp = hlp.substring(0, hlp.length()-1);
                         array[i] = hlp;
                     }
                 } else {

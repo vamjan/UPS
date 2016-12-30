@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include "server.h"
 #include "sini_log.h"
+#include "lobby.h"
 
 void print_server_data(server_data *server) {
     int i;
@@ -95,7 +96,6 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Error creating thread\n");
         return EXIT_FAILURE;
     }
-
 
     while (run) {
         scanf("%c", &input);

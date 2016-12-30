@@ -15,16 +15,24 @@ public enum MsgType {
     //ERROR('R'), //send or recieve msg describing some error on client/server
     DISCONNECT('D'), //server or client is disconnecting client
     GET_SERVER('G'), //get available server data
+    
     START('S'), //command server to start game or server sending msg that game is starting
+    UNITS('I'), //send units from server
+    UPDATE('U'),
+    
     END('E'), //server or client ended the game session
     MOVE('O'), //move unit from [X1, Y1] to [X2, Y2]
     ATTACK('A'), //unit A attacks unit B for X dmg
     CAPTURE('Z'), //unit A captured zone Z
+    SKIP('K'), //player skips action
+    TURN('N'), //turn score update
+    
     GET_LOBBY('G'), //get available lobby data
     CREATE_LOBBY('L'), //create lobby/lobby is created and is waiting for you
     JOIN_LOBBY('J'), //join open lobby/update lobby info
     TOGGLE_READY('T'),
     LEAVE_LOBBY('V'), //leave open lobby/you were kicked from lobby
+    
     ACK('X'), //acknowledge success
     NACK('Y'), //
     POKE('P');

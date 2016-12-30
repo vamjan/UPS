@@ -24,15 +24,17 @@
     <children>
         <Pane fx:id="gamePane" disable="true" layoutX="14.0" layoutY="14.0" prefHeight="741.0" prefWidth="996.0" visible="false">
             <children>
-                <ScrollPane layoutX="309.0" prefHeight="706.0" prefWidth="687.0">
-                    <content>
-                        <Canvas fx:id="gameCanvas" height="768.0" width="1024.0" />
-                    </content>
-                </ScrollPane>
+                <AnchorPane layoutX="309.0" prefHeight="700.0" prefWidth="700.0">
+                    <children>
+                        <Canvas fx:id="canvasMap" height="700" width="700.0" />
+                        <Canvas fx:id="canvasField" height="700.0" width="700.0" />
+                    </children>
+                </AnchorPane>
                 <FlowPane fx:id="gameInfo" prefHeight="530.0" prefWidth="300.0" />
                 <ButtonBar fx:id="gameButtonBar" layoutX="309.0" layoutY="707.0" prefHeight="40.0" prefWidth="687.0">
                     <buttons>
-                        <Button mnemonicParsing="false" text="Game" />
+                        <Button fx:id="concedeButton" mnemonicParsing="false" text="Concede" />
+                        <Button fx:id="skipButton" mnemonicParsing="false" text="Skip" />
                     </buttons>
                 </ButtonBar>
             </children>

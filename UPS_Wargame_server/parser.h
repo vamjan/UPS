@@ -26,6 +26,10 @@ typedef enum {
     JOIN_LOBBY = 'J', //join open lobby
     LEAVE_LOBBY = 'V', //leave open lobby/you were kicked from lobby
     TOGGLE_READY = 'T',
+    START = 'S',
+    UNITS = 'I',
+    UPDATE = 'U',
+    END = 'E',
     POKE = 'P'
 } msg_type;
 

@@ -45,7 +45,13 @@ command *create_ack(int id_key, int type) {
 int destroy_command(command **command) {
     logger("INFO", "Destroying command");
 
-    if ((*command)->data) free((*command)->data);
+    if ((*command)->data) {
+        int i;
+        for(i = 0; i < (*command)->length; i++) {
+            free((*command)->data[i]);
+        }
+        free((*command)->data);
+    }
     free(*command);
     *command = NULL;
 
@@ -199,6 +205,15 @@ msg_type get_type(const char c) {
             break;
         case 'T':
             retval = TOGGLE_READY;
+            break;
+        case 'S':
+            retval = START;
+            break;
+        case 'U':
+            retval = UPDATE;
+            break;
+        case 'I':
+            retval = UNITS;
             break;
         case 'P':
             retval = POKE;

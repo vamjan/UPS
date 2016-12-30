@@ -14,26 +14,37 @@ import java.util.Random;
  *
  * @author sini
  */
-public class GameData {
+public class GameData implements IGameData {
 
     private Playfield playfield = null;
     private List<Unit> units = null;
 
+    private int onTurnIndex;
+    private String playerBlue = null;
+    private String playerRed = null;
+    private int blueScore;
+    private int redScore;
+
+    private boolean waiting;
+    private boolean attacking;
+    private char userAllegiance;
+
     public GameData() {
         this.playfield = new Playfield(10, 15);
-        
-        for(int i = 0; i < playfield.getRows(); i++)
+
+        for (int i = 0; i < playfield.getRows(); i++) {
             Arrays.fill(playfield.getMap()[i], 'G');
-        
+        }
+
         Random rnd = new Random();
-        for(int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             int x = rnd.nextInt(10), y = rnd.nextInt(15);
             playfield.getMap()[x][y] = 'D';
         }
-        
+
         this.units = new ArrayList();
-        
-        Unit tmp = new Unit(0, 0, 'S');
+
+        /*Unit tmp = new Unit(0, 0, 'S');
         tmp.setAllegiance('B');
         this.units.add(tmp);
         tmp = new Unit(1, 0, 'S');
@@ -62,14 +73,128 @@ public class GameData {
         this.units.add(tmp);
         tmp = new Unit(9, 0, 'S');
         tmp.setAllegiance('R');
-        this.units.add(tmp);
+        this.units.add(tmp);*/
+
+        this.onTurnIndex = 0;
+    }
+
+    public GameData(int rows, int cols, char[][] map) {
+        this.playfield = new Playfield(rows, cols);
+        this.playfield.setMap(map);
+    }
+    
+    public void updateScore(String playerBlu, String playerRed, int scoreBlu, int scoreRed, char player) {
+        this.playerBlue = playerBlu;
+        this.playerRed = playerRed;
+        this.blueScore = scoreBlu;
+        this.redScore = scoreRed;
+        this.userAllegiance = player;
+    }
+
+    public Unit getUnitOnTurn() {
+        return units.get(onTurnIndex % units.size());
+    }
+    
+    public Unit incrementTurn() {
+        Unit retval = null;
+        onTurnIndex++;
+        while ((retval = units.get(onTurnIndex % units.size())).getType() == 'F') {
+            onTurnIndex++;
+        }
+        return retval;
+    }
+
+    public boolean playerOnTurn(char al) {
+        return getUnits().get(onTurnIndex % getUnits().size()).getAllegiance() == al;
+    }
+
+    public boolean checkOccupied(int r, int q) {
+        for (Unit val : units) {
+            if (val.getCoordX() == r && val.getCoordZ() == q) {
+                if (val.isMovable()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    @Override
+    public Unit getUnitOnCoords(int r, int q) {
+        for (Unit val : units) {
+            if (val.getCoordX() == r && val.getCoordZ() == q) {
+                return val;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public Unit getUnitByID(int ID) {
+        for (Unit val : units) {
+            if (val.getID() == ID) {
+                return val;
+            }
+        }
+        return null;
+    }
+
+    public boolean play(int r, int q) {
+        Unit unit = this.getUnitOnTurn();
+        unit.setMoveRange(10); //temporary
+        unit.setAttackRange(10);
+        
+        return true;
+    }
+
+    public void skip() {
+        
     }
 
     public Playfield getPlayField() {
         return playfield;
     }
-    
+
     public List<Unit> getUnits() {
         return units;
+    }
+    
+    public void setUnits(List<Unit> units) {
+        this.units = units;
+    }
+
+    /**
+     * @return the playerBlue
+     */
+    public String getPlayerBlue() {
+        return playerBlue;
+    }
+
+    /**
+     * @return the playerRed
+     */
+    public String getPlayerRed() {
+        return playerRed;
+    }
+
+    /**
+     * @return the blueScore
+     */
+    public int getBlueScore() {
+        return blueScore;
+    }
+
+    /**
+     * @return the redScore
+     */
+    public int getRedScore() {
+        return redScore;
+    }
+
+    /**
+     * @return the playerAllegiance
+     */
+    public char getUserAllegiance() {
+        return userAllegiance;
     }
 }

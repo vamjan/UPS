@@ -92,7 +92,7 @@ public class Lobby {
             retval.setReadyOne(args[4].equals("RDY"));
             retval.setPlayerTwo(args[5]);
             retval.setReadyTwo(args[6].equals("RDY"));
-        } catch (Exception e) {
+        } catch (NumberFormatException nfe) {
             System.err.println("Can't create lobby from arguments: " + args);
         }
 

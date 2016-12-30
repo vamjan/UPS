@@ -35,7 +35,6 @@ typedef struct {
     client_data *player_two;
     int ready_one;
     int ready_two;
-    unit *on_turn;
     int game_in_progress;
     int running;
     playfield *pf;
@@ -52,8 +51,8 @@ typedef struct {
     lobby **lobbies;
 } server_data;
 
-static client_data unoc_client = {0};
-static lobby unoc_lobby = {0};
+//static const client_data unoc_client = {0};
+//static const lobby unoc_lobby = {0};
 
 void *start_server(void *arg);
 client_data *create_client(int fd);

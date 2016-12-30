@@ -215,7 +215,6 @@ void broadcast(command *c) {
 }
 
 void broadcast_lobby(command *c, lobby *l) {
-    int i = 0;
     char *com_msg = parse_output(c);
     if (l->player_one) write(l->player_one->fd, com_msg, strlen(com_msg));
     if (l->player_two) write(l->player_two->fd, com_msg, strlen(com_msg));
@@ -274,6 +273,31 @@ int init_lobby(lobby * lobbies[], int max_lobbies, char *name) {
         //}
     }
 
+    return retval;
+}
+
+char **parse_units(unit *units[], int count) {
+    char **retval = malloc(sizeof (char *) * count);
+    int i;
+
+    for (i = 0; i < count; i++) {
+        retval[i] = parse_unit(units[i]);
+    }
+
+    return retval;
+}
+
+char **parse_game_info(lobby *l, client_data *c) {
+    char **retval = malloc(sizeof (char *) * 5);
+    
+    retval[0] = strdup(l->player_one->player_name);
+    retval[1] = strdup(l->player_two->player_name);
+    retval[2] = calloc(sizeof(char), 4);
+    snprintf(retval[2], 4, "%d", l->pf->score_one);
+    retval[3] = calloc(sizeof(char), 4);
+    snprintf(retval[3], 4, "%d", l->pf->score_two);
+    retval[4] = calloc(sizeof(char), 2);
+   
     return retval;
 }
 
@@ -360,9 +384,44 @@ command *execute_command(command *c, client_data *client, int *client_index, int
                 broadcast_lobby(retval, server->lobbies[*lobby_index]);
                 destroy_command(&retval);
                 
-                if(check_ready(server->lobbies[*lobby_index]))
-                    printf("BOTH PLAYERS ARE READY\n");
+                //start game procedure
+                if(check_ready(server->lobbies[*lobby_index])) {
+                    //send map layout
+                    create_hex_map(server->lobbies[*lobby_index]->pf);
+                    tmp = malloc(sizeof (char *) * server->lobbies[*lobby_index]->pf->rows);
+                    tmp = parse_map(server->lobbies[*lobby_index]->pf);
+                    retval = create_command(client->id_key, START, server->lobbies[*lobby_index]->pf->rows, tmp);
+                    broadcast_lobby(retval, server->lobbies[*lobby_index]);
+                    destroy_command(&retval);
+                    
+                    //set units
+                    tmp = malloc(sizeof (char *) * 17); //number of units
+                    tmp = parse_units(server->lobbies[*lobby_index]->pf->units, 17);
+                    retval = create_command(client->id_key, UNITS, 17, tmp);
+                    broadcast_lobby(retval, server->lobbies[*lobby_index]);
+                    destroy_command(&retval);
+                    
+                    //set player info
+                    tmp = malloc(sizeof (char *) * 5);
+                    tmp = parse_game_info(server->lobbies[*lobby_index], client);
+                    retval = create_command(client->id_key, UPDATE, 5, tmp);
+                    tmp[4][0] = BLU;
+                    char *com_msg = parse_output(retval);
+                    if (server->lobbies[*lobby_index]->player_one) 
+                        write(server->lobbies[*lobby_index]->player_one->fd, com_msg, strlen(com_msg));
+                    free(com_msg);
+                    
+                    tmp[4][0] = RED;
+                    com_msg = parse_output(retval);
+                    if (server->lobbies[*lobby_index]->player_two) 
+                        write(server->lobbies[*lobby_index]->player_two->fd, com_msg, strlen(com_msg));
+                    free(com_msg);
+
+                    destroy_command(&retval);
+                }
             }
+            break;
+        case(END):
             break;
         case(POKE):
             retval = create_command(client->id_key, POKE, 0, NULL);
