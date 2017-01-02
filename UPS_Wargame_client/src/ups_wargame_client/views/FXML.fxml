@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
+    
+</AnchorPane>
+<?xml version="1.0" encoding="UTF-8"?>
+
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
@@ -29,7 +40,7 @@
                         <Canvas fx:id="canvasField" height="700.0" width="700.0" />
                     </children>
                 </AnchorPane>
-                <ListView  fx:id="gameInfo" prefHeight="530.0" prefWidth="300.0" />
+                <FlowPane fx:id="gameInfo" prefHeight="530.0" prefWidth="300.0" />
                 <ButtonBar fx:id="gameButtonBar" layoutX="309.0" layoutY="707.0" prefHeight="40.0" prefWidth="687.0">
                     <buttons>
                         <Button fx:id="concedeButton" mnemonicParsing="false" text="Concede" />
@@ -60,7 +71,6 @@
                         <Label id="vsLabel" alignment="CENTER" layoutX="293.0" layoutY="28.0" prefHeight="50.0" prefWidth="100.0" text="VS" />
                         <Label fx:id="readyOneLabel" alignment="CENTER_RIGHT" layoutX="14.0" layoutY="64.0" prefHeight="50.0" prefWidth="280.0" text="ReadyPlayer1" />
                         <Label fx:id="readyTwoLabel" layoutX="393.0" layoutY="64.0" prefHeight="50.0" prefWidth="280.0" text="ReadyPlayer2" />
-                        <Label fx:id="winLabel" layoutX="250" layoutY="100.0" prefHeight="50.0" prefWidth="280.0" />
                      </children>
                   </AnchorPane>
               </content>
@@ -69,17 +79,6 @@
         </Pane>
         <TabPane fx:id="chatPane" layoutY="550.0" prefHeight="220.0" prefWidth="311.0" tabClosingPolicy="UNAVAILABLE">
             <tabs>
-                <Tab text="lobby chat">
-                    <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                            <children>
-                                <TextArea fx:id="lobbyChatTextArea" prefHeight="145.0" prefWidth="300.0" />
-                                <TextField fx:id="lobbyChatTextField" layoutY="146.0" prefHeight="26.0" prefWidth="241.0" />
-                                <Button fx:id="lobbyChatButton" layoutX="244.0" layoutY="146.0" mnemonicParsing="false" text="Send" />
-                            </children>
-                        </AnchorPane>
-                    </content>
-                </Tab>
                 <Tab text="server chat">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -87,6 +86,17 @@
                                 <TextArea fx:id="serverChatTextArea" prefHeight="145.0" prefWidth="300.0" />
                                 <TextField fx:id="serverChatTextField" layoutY="146.0" prefHeight="26.0" prefWidth="241.0" />
                                 <Button fx:id="serverChatButton" layoutX="244.0" layoutY="146.0" mnemonicParsing="false" text="Send" />
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="lobby chat">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <TextArea fx:id="lobbyChatTextArea" prefHeight="145.0" prefWidth="300.0" />
+                                <TextField fx:id="lobbyChatTextField" layoutY="146.0" prefHeight="26.0" prefWidth="241.0" />
+                                <Button fx:id="lobbyChatButton" layoutX="244.0" layoutY="146.0" mnemonicParsing="false" text="Send" />
                             </children>
                         </AnchorPane>
                     </content>

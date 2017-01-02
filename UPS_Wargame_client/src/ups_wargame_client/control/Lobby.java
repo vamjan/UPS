@@ -80,7 +80,7 @@ public class Lobby {
         if (!playerTwo.equals("FREE")) {
             count++;
         }
-        return String.format("%s %d/2", this.name, count);
+        return String.format("%s: %d/2", this.name, count);
     }
 
     public static Lobby parseLobby(String[] args) {

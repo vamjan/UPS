@@ -5,6 +5,7 @@
  */
 package ups_wargame_client.control;
 
+import ups_wargame_client.data_model.IGameData;
 import ups_wargame_client.views.IViewable;
 
 /**
@@ -17,4 +18,5 @@ public interface IController {
     public void addToInputQueue(Command command);
     public void addToOutputQueue(Command command);
     public int getClientID();
+    public IGameData getGameData();
 }

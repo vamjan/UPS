@@ -42,8 +42,6 @@ typedef struct {
 
 //static const unit empty = {0};
 
-//#pragma pack(4)
-
 typedef struct {
     char** terain;
     unit** units;
@@ -53,7 +51,6 @@ typedef struct {
     int score_one;
     int score_two;
 } playfield;
-//#pragma pack()
 
 static const char default_map[DEFAULT_ROWS][DEFAULT_COLS] = {
     {'D', 'D', 'D', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'},
@@ -69,26 +66,26 @@ static const char default_map[DEFAULT_ROWS][DEFAULT_COLS] = {
 };                                 
 
 static const unit default_units[] = {
-    {4, TANK, BLU, 30, 10, 4, 3, 1, 1, 6},
-    {11, TANK, RED, 30, 10, 4, 3, 1, 13, -4},
-    {5, TANK, BLU, 30, 10, 4, 3, 1, 2, 7},
-    {12, TANK, RED, 30, 10, 4, 3, 1, 12, -5},
+    {4, TANK, BLU, 30, 10, 4, 3, 0, 1, 6},
+    {11, TANK, RED, 30, 10, 4, 3, 0, 13, -4},
+    {5, TANK, BLU, 30, 10, 4, 3, 0, 2, 7},
+    {12, TANK, RED, 30, 10, 4, 3, 0, 12, -5},
     
-    {7, INFANTRY, RED, 10, 5, 2, 1, 1, 13, -3},
-    {0, INFANTRY, BLU, 10, 5, 2, 1, 1, 1, 5},
-    {8, INFANTRY, RED, 10, 5, 2, 1, 1, 12, -3},
-    {1, INFANTRY, BLU, 10, 5, 2, 1, 1, 2, 5},
-    {9, INFANTRY, RED, 10, 5, 2, 1, 1, 11, -3},
-    {2, INFANTRY, BLU, 10, 5, 2, 1, 1, 3, 5},
-    {10, INFANTRY, RED, 10, 5, 2, 1, 1, 11, -4},
-    {3, INFANTRY, BLU, 10, 5, 2, 1, 1, 3, 6},
+    {7, INFANTRY, RED, 10, 5, 2, 1, 0, 13, -3},
+    {0, INFANTRY, BLU, 10, 5, 2, 1, 0, 1, 5},
+    {8, INFANTRY, RED, 10, 5, 2, 1, 0, 12, -3},
+    {1, INFANTRY, BLU, 10, 5, 2, 1, 0, 2, 5},
+    {9, INFANTRY, RED, 10, 5, 2, 1, 0, 11, -3},
+    {2, INFANTRY, BLU, 10, 5, 2, 1, 0, 3, 5},
+    {10, INFANTRY, RED, 10, 5, 2, 1, 0, 11, -4},
+    {3, INFANTRY, BLU, 10, 5, 2, 1, 0, 3, 6},
     
-    {6, SPG, BLU, 15, 12, 2, 5, 1, 2, 6},
-    {13, SPG, RED, 15, 12, 2, 5, 1, 12, -4},
+    {6, SPG, BLU, 15, 12, 2, 5, 0, 2, 6},
+    {13, SPG, RED, 15, 12, 2, 5, 0, 12, -4},
     
-    {14, FLAG, NEUTRAL, 1, 1, 0, 0, 0, 4, -1},
-    {15, FLAG, NEUTRAL, 1, 1, 0, 0, 0, 7, 0},
-    {16, FLAG, NEUTRAL, 1, 1, 0, 0, 0, 11, 1}
+    {14, FLAG, NEUTRAL, 1, 1, 0, 0, 0, 5, 0},
+    {15, FLAG, NEUTRAL, 1, 1, 0, 0, 0, 5, 4},
+    {16, FLAG, NEUTRAL, 1, 1, 0, 0, 0, 11, -1}
 };
 
 //FUNCTIONS
@@ -110,12 +107,15 @@ unit *next_turn(playfield *pf);
 //UNIT MANAGEMENT
 int add_unit(playfield *pf, unit* target);
 int rmv_unit(playfield *pf, unit* target);
+unit *get_unit(playfield *pf, int index);
+unit *get_unit_on_coords(playfield *pf, int x, int z);
 
 //UNIT FUNCTIONS
 unit *create_unit(int coord_x, int coord_z, unittype type, allegiance al, short ID);
 int destroy_unit(unit **u);
-int change_allegiance(unit* target, allegiance al);
+int change_allegiance(unit* target, char al);
 int deal_damage(unit *target, short amount);
+int attack_unit(unit *source, unit *target);
 int move_unit(unit *target, int coord_x, int coord_z);
 int check_range(int start_x, int start_z, int dest_x, int dest_z, int range);
 char *parse_unit(unit *target);

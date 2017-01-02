@@ -43,7 +43,6 @@ import ups_wargame_client.control.ClientController;
 import ups_wargame_client.control.Command;
 import ups_wargame_client.control.IController;
 import ups_wargame_client.control.Lobby;
-import ups_wargame_client.data_model.GameData;
 import ups_wargame_client.data_model.IGameData;
 import ups_wargame_client.data_model.Playfield;
 import ups_wargame_client.data_model.Unit;
@@ -66,15 +65,17 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     private TabPane chatPane;
     @FXML
     private TitledPane lobbyInfo;
-    @FXML 
+    @FXML
     private Pane gamePane;
-    @FXML 
+    @FXML
     private Pane lobbyPane;
-    
 
     @FXML
     private ListView lobbyList;
-    private ObservableList<Lobby> obsList = FXCollections.observableArrayList();
+    private ObservableList<Lobby> obsLobby = FXCollections.observableArrayList();
+    @FXML
+    private ListView gameInfo;
+    private ObservableList<Unit> obsUnits = FXCollections.observableArrayList();
 
     @FXML
     private Button disconnectButton;
@@ -106,15 +107,26 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     private Label readyOneLabel;
     @FXML
     private Label readyTwoLabel;
-    
+    @FXML
+    private Label winLabel;
+
     @FXML
     private Canvas canvasMap;
     @FXML
     private Canvas canvasField;
 
-    private GameData gd = null;
+    private IGameData gd = null;
     private final Image[] cachedImages = new Image[9];
     private int lastI = 0, lastJ = 0;
+    private double offsetX;
+    private double offsetY;
+    private double startX;
+    private double endX;
+    private double startY;
+    private double endY;
+    private double horizonstalDistance;
+    private double hexSize;
+    private double verticalDistance;
 
     /**
      * Initializes the controller class.
@@ -123,10 +135,11 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     public void initialize(URL url, ResourceBundle rb) {
         controller = ClientController.getInstance();
         controller.setupView(this);
-
-        lobbyList.setItems(obsList);
-        lobbyInfo.setExpanded(false);
         
+        gameInfo.setItems(obsUnits);
+        lobbyList.setItems(obsLobby);
+        lobbyInfo.setExpanded(false);
+
         cachedImages[0] = new Image(getClass().getResourceAsStream("/Flag_white.png"));
         cachedImages[1] = new Image(getClass().getResourceAsStream("/Flag_blue.png"));
         cachedImages[2] = new Image(getClass().getResourceAsStream("/Flag_red.png"));
@@ -137,19 +150,16 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         cachedImages[7] = new Image(getClass().getResourceAsStream("/Tank_blue.png"));
         cachedImages[8] = new Image(getClass().getResourceAsStream("/Tank_red.png"));
 
-        double offsetX = 75;
-        double offsetY = 200;
+        offsetX = 75;
+        offsetY = 200;
 
-        double startX = offsetX;
-        double endX = canvasMap.getWidth() - offsetX;
-        double startY = offsetY;
-        double endY = canvasMap.getHeight() - offsetY;
-        double horizonstalDistance = (endX - startX) / 15; //HACK: musi se zjistit pri startu
-        double hexSize = horizonstalDistance / 0.75;
-        double verticalDistance = 0.86603 * hexSize; //sqrt(3)/2*hexsize
-
-        //this.drawMap(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize);
-        //this.drawUnits(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize / 1.5);
+        startX = offsetX;
+        endX = canvasMap.getWidth() - offsetX;
+        startY = offsetY;
+        endY = canvasMap.getHeight() - offsetY;
+        horizonstalDistance = (endX - startX) / 15; //HACK: musi se zjistit pri startu
+        hexSize = horizonstalDistance / 0.75;
+        verticalDistance = 0.86603 * hexSize; //sqrt(3)/2*hexsize
 
         disconnectButton.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -177,8 +187,8 @@ public class GameWindowLayoutController implements Initializable, IViewable {
 
                 // Traditional way to get the response value.
                 Optional<String> result = dialog.showAndWait();
-                if (result.isPresent()) {
-                    Object o[] = {result.get()};
+                if (result.isPresent() && result.get().length() <= 30) {
+                    Object o[] = {result.get().replace("|", "")};
                     controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.CREATE_LOBBY, (short) 1, o));
                 }
             }
@@ -213,23 +223,36 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.TOGGLE_READY, (short) 0, null));
             }
         });
-        
+
         concedeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.END, (short) 0, null));
+                if (gd.playerOnTurn()) {
+                    controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.END, (short) 0, null));
+                } else {
+                    showLobbyMessage("[Client]: ", "Not your turn!");
+                }
             }
         });
-        
+
         skipButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.SKIP, (short) 0, null));
+                if (gd.playerOnTurn()) {
+                    if(gd.getAttacking()) {
+                        System.out.println("Skipping attack");
+                        controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.SKIP, (short) 0, null));
+                    } else {
+                        System.out.println("Skipping move");
+                        gd.setAttacking(true);
+                        gd.setUpdated(true);
+                    }
+                } else {
+                    showLobbyMessage("[Client]: ", "Not your turn!");
+                }
             }
         });
-        
-        
-        
+
         canvasField.setOnMouseMoved(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -246,11 +269,11 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 if (lastI == i && lastJ == j) {
                 } else {
                     drawPoint(lastI, lastJ, startX, startY, horizonstalDistance, verticalDistance,
-                            hexSize-4, gd.getPlayField().getMap()[lastI][lastJ], g2d);
+                            hexSize - 4, gd.getPlayField().getMap()[lastI][lastJ], g2d);
 
                     if (gd.getPlayField().contains(i, j)) {
                         drawPoint(i, j, startX, startY, horizonstalDistance, verticalDistance,
-                                hexSize-5, 'Y', g2d);
+                                hexSize - 5, 'Y', g2d);
 
                         lastI = i;
                         lastJ = j;
@@ -258,29 +281,32 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 }
             }
         });
-        
+
         canvasField.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 int r = Playfield.getRow(lastI, lastJ);
                 int q = lastJ;
-                
-                
+
+                if (gd.play(q, r)) {//something weird here
+                    System.out.println("I PLAY!");
+                } else {
+                    System.out.println("I CAN'T PLAY!");
+                }
             }
         });
-        
+
         gamePane.visibleProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if(newValue) {
-                    drawMap(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize);
-                    drawUnits(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize/1.5);
+                if (newValue) {
+                    draw();
                 } else {
                     canvasField.getGraphicsContext2D().clearRect(0, 0, canvasField.getHeight(), canvasField.getWidth());
                     canvasMap.getGraphicsContext2D().clearRect(0, 0, canvasMap.getHeight(), canvasMap.getWidth());
                 }
             }
-            
+
         });
     }
 
@@ -313,8 +339,8 @@ public class GameWindowLayoutController implements Initializable, IViewable {
 
     @Override
     public void setLobbyList(List list) {
-        obsList.clear();
-        obsList.addAll(list);
+        obsLobby.clear();
+        obsLobby.addAll(list);
     }
 
     @Override
@@ -346,9 +372,11 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         connectLobbyButton.setVisible(!isConnected);
         leaveLobbyButton.setVisible(isConnected);
         readyButton.setVisible(isConnected);
+        addLobbyButton.setVisible(!isConnected);
         connectLobbyButton.setManaged(!isConnected);
         leaveLobbyButton.setManaged(isConnected);
         readyButton.setManaged(isConnected);
+        addLobbyButton.setManaged(!isConnected);
     }
 
     @Override
@@ -369,55 +397,45 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     public void setPrimaryStage(Stage stage) {
         this.mainStage = stage;
     }
-    
+
     @Override
-    public void setupGameData(int rows, String[] map) {
-        int cols = map[0].length();
-        char[][] tmp = new char[rows][cols];
-        for(int i = 0; i < rows; i++) {
-            tmp[i] = map[i].toCharArray();
-        }
-        this.gd = new GameData(rows, cols, tmp);
-    }
-    
-    @Override
-    public void setUnits(List list) {
-        this.gd.setUnits(list);
-        this.startGame();
-    }
-    
-    @Override
-    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int unitID, char player) {
-        this.gd.updateScore(playerBlu, playerRed, scoreBlu, scoreRed, unitID, player);
-        this.drawScore();
-    }
-    
-    @Override
-    public void startGame() {
+    public void startGame(IGameData data) {
+        this.gd = data;
         gamePane.setDisable(false);
         lobbyPane.setDisable(true);
         gamePane.setManaged(true);
         lobbyPane.setManaged(false);
         gamePane.setVisible(true);
         lobbyPane.setVisible(false);
+        winLabel.setText("");
     }
-    
+
     @Override
-    public void endGame() {
+    public void endGame(String winner) {
         gamePane.setDisable(true);
         lobbyPane.setDisable(false);
         gamePane.setManaged(false);
         lobbyPane.setManaged(true);
         gamePane.setVisible(false);
         lobbyPane.setVisible(true);
+        winLabel.setText(winner + " has won the game!");
+        this.gd = null;
     }
-    
+
+    public void draw() {
+        drawMap(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize);
+        drawUnits(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize / 1.5);
+    }
+
     @Override
-    public IGameData getGameData() {
-        return this.gd;
+    public void redraw(IGameData data) {
+        this.gd = data;
+        drawUnits(gd, startX, startY, horizonstalDistance, verticalDistance, hexSize / 1.5);
+        drawScore(gd);
+        updateUnits(gd);
     }
-    
-    public void drawMap(GameData gd, double startX, double startY, double horizonstalDistance, double verticalDistance, double hexSize) {
+
+    public void drawMap(IGameData gd, double startX, double startY, double horizonstalDistance, double verticalDistance, double hexSize) {
 
         GraphicsContext g2d = canvasMap.getGraphicsContext2D();
 
@@ -429,7 +447,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
             for (int j = 0; j < gd.getPlayField().getColumns(); j++) {
                 //int row = Playfield.getRow(i, j);
                 drawPoint(i, j, startX, startY, horizonstalDistance, verticalDistance,
-                       hexSize, gd.getPlayField().getMap()[i][j], g2d);
+                        hexSize, gd.getPlayField().getMap()[i][j], g2d);
                 /*if (j % 2 == 0) {
                     this.drawHex((startX + horizonstalDistance * j) + (horizonstalDistance / 2),
                             (startY + verticalDistance * i) + (verticalDistance / 2),
@@ -454,8 +472,9 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                         hexSize, '0', g2d);
             }
         }
-        
+
         g2d.setStroke(Color.TRANSPARENT);
+        
         canvasField.toFront();
     }
 
@@ -498,22 +517,24 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         g2d.strokePolygon(coordsX, coordsY, 6);
     }
 
-    public void drawUnits(GameData gd, double startX, double startY, double horizonstalDistance, double verticalDistance, double hexSize) {
+    public void drawUnits(IGameData gd, double startX, double startY, double horizonstalDistance, double verticalDistance, double hexSize) {
         GraphicsContext g2d = canvasField.getGraphicsContext2D();
-        
+
         g2d.clearRect(0, 0, canvasField.getWidth(), canvasField.getHeight());
-        
+
         for (Unit val : gd.getUnits()) {
-            int row = Playfield.convertRow(val.getCoordX(), val.getCoordZ());
-            int col = val.getCoordZ();
-            if (col % 2 == 0) {
-                this.drawUnit((startX + horizonstalDistance * col) + (horizonstalDistance / 2),
-                        (startY + verticalDistance * row) + (verticalDistance / 2),
-                        hexSize, val, g2d);
-            } else {
-                this.drawUnit((startX + horizonstalDistance * col) + (horizonstalDistance / 2),
-                        (startY + verticalDistance * row),
-                        hexSize, val, g2d);
+            if (!val.isDead()) {
+                int row = Playfield.convertRow(val.getCoordX(), val.getCoordZ());
+                int col = val.getCoordZ();
+                if (col % 2 == 0) {
+                    this.drawUnit((startX + horizonstalDistance * col) + (horizonstalDistance / 2),
+                            (startY + verticalDistance * row) + (verticalDistance / 2),
+                            hexSize, val, g2d);
+                } else {
+                    this.drawUnit((startX + horizonstalDistance * col) + (horizonstalDistance / 2),
+                            (startY + verticalDistance * row),
+                            hexSize, val, g2d);
+                }
             }
         }
     }
@@ -549,25 +570,65 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                     y - size / 2,
                     width, height);
         }
+        if (unit.equals(gd.getUnitOnTurn())) {
+            drawConvenientArrow(x, y, Color.CORAL, size / 2);
+        }
     }
-    
-    private void drawScore() {
+
+    public void drawScore(IGameData gd) {
         GraphicsContext g2d = canvasField.getGraphicsContext2D();
-        
+
         g2d.clearRect(0, 0, canvasField.getWidth(), 200);
-        
+
+        if (gd.getUnitOnTurn().getAllegiance() == 'B') {
+            g2d.setStroke(Color.BLACK);
+        }
         g2d.setFill(Color.BLUE);
         g2d.setFont(new Font(25));
-        
+
         g2d.fillText(gd.getPlayerBlue(), 50, 50);
-        g2d.fillText(String.valueOf(gd.getBlueScore()), 150, 50);
-        
+        g2d.strokeText(gd.getPlayerBlue(), 50, 50);
+        g2d.fillText(String.valueOf(gd.getBlueScore()), 250, 50);
+
+        g2d.setStroke(Color.TRANSPARENT);
         g2d.setFill(Color.BLACK);
         g2d.fillText("VS", 325, 50);
-        
+        if (gd.playerOnTurn()) {
+            g2d.fillText(gd.getAttacking() ? "ATTACKING" : "MOVING", 285, 80);
+        } else {
+            g2d.fillText("WAITING", 285, 80);
+        }
+
+        if (gd.getUnitOnTurn().getAllegiance() == 'R') {
+            g2d.setStroke(Color.BLACK);
+        }
         g2d.setFill(Color.RED);
-        g2d.fillText(String.valueOf(gd.getBlueScore()), 500, 50);
-        g2d.fillText(gd.getPlayerBlue(), 550, 50);
-        
+        g2d.fillText(String.valueOf(gd.getRedScore()), 400, 50);
+        g2d.fillText(gd.getPlayerRed(), 450, 50);
+        g2d.strokeText(gd.getPlayerRed(), 450, 50);
+
+        g2d.setStroke(Color.TRANSPARENT);
+        g2d.setFill(Color.BLACK);
+    }
+
+    public void drawConvenientArrow(double x, double y, Color color, double hexSize) {
+        y -= hexSize * 1.5;
+
+        GraphicsContext g2d = canvasField.getGraphicsContext2D();
+
+        double coordsX[] = {x, x + 10, x + 5};
+        double coordsY[] = {y, y, y + 7};
+
+        g2d.setFill(color);
+        g2d.fillPolygon(coordsX, coordsY, 3);
+    }
+    
+    public void updateUnits(IGameData gd) {
+        obsUnits.clear();
+        for(Unit val : gd.getUnits()) {
+            if(val.getType() != 'F' && !val.isDead()) {
+                obsUnits.add(val);
+            }
+        }
     }
 }

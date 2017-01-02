@@ -68,7 +68,7 @@ int lobby_is_empty(lobby *target) {
 
 char *parse_lobby(lobby *target, int index) {
     char retval[BUFFER_LENGTH];
-    memset(retval, 0, sizeof (retval));
+    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
 
     char player_one[30] = FREE;
     char player_one_ready[30] = NOT_READY;
@@ -109,7 +109,7 @@ int check_ready(lobby *target) {
 }
 
 int reset_lobby(lobby *target) {
-    //if(target->pf)
-    //    destroy_playfield(&(target->pf));
+    if(target->pf)
+        destroy_playfield(&(target->pf));
     target->pf = create_playfield(DEFAULT_ROWS, DEFAULT_COLS);
 }

@@ -36,7 +36,7 @@ playfield *create_playfield(int rows, int columns) {
             pf->terain[i][j] = 'E';
     }
 
-    pf->units = malloc(sizeof (unit *) * UNIT_ARRAY);
+    pf->units = calloc(sizeof (unit *), UNIT_ARRAY);
 
     pf->on_turn = 0;
     pf->score_one = 0;
@@ -63,8 +63,8 @@ int create_hex_map(playfield *pf) {
 char *get_hex(playfield *pf, int r, int q) {
     // r = i
     // q = j - r/2
-    int i = r;
-    int j = q + (r + 1) / 2;
+    int i = r + (q + 1) / 2;
+    int j = q;
     if ((i >= 0 && i < pf->rows) && (j >= 0 && j < pf->columns)) {
         return &(pf->terain[i][j]);
     } else {
@@ -76,8 +76,8 @@ char *get_hex(playfield *pf, int r, int q) {
 }
 
 int set_hex(playfield *pf, int r, int q, char value) {
-    int i = r;
-    int j = q + (r + 1) / 2;
+    int i = r + (q + 1) / 2;
+    int j = q;
     if ((i >= 0 && i < pf->rows) && (j >= 0 && j < pf->columns)) {
         pf->terain[i][j] = value;
         return 1;
@@ -138,10 +138,11 @@ unit *next_turn(playfield *pf) {
     unit *retval = NULL;
 
     do {
-        retval = pf->units[pf->on_turn++ % 17];
+        pf->on_turn++;
+        retval = pf->units[pf->on_turn % UNIT_ARRAY];
         if (retval->type == FLAG && retval->al != NEUTRAL)
             (retval->al == BLU) ? pf->score_one++ : pf->score_two++;
-        if (pf->on_turn >= UNIT_ARRAY * ROUND_COUNT) {
+        if (pf->on_turn > UNIT_ARRAY * ROUND_COUNT) {
             retval = NULL;
             break;
         }
@@ -161,11 +162,15 @@ void print_playfield(playfield *pf) {
     for (i = 0; i < pf->rows; i++) {
         if (i % 2 == 0) printf("    ");
         for (j = 0; j < pf->columns; j++) {
-            printf("[%c %d %d]", pf->terain[i][j], i, j - (i + 1) / 2);
+            printf("[%c %d %d]", pf->terain[i][j], i - (j + 1) / 2, j);
         }
         printf("\n");
     }
     printf("\n");
+    
+    for(i = 0; i < UNIT_ARRAY; i++) {
+        printf("[%d %d %d]\n", pf->units[i]->ID, pf->units[i]->coord_x, pf->units[i]->coord_z);
+    }
 }
 
 char **parse_map(playfield *pf) {
@@ -173,8 +178,8 @@ char **parse_map(playfield *pf) {
 
     int i;
     for (i = 0; i < pf->rows; i++) {
-        retval[i] = malloc(sizeof (char) * pf->columns);
-        memcpy(retval[i], pf->terain[i], pf->columns);
+        retval[i] = calloc(sizeof (char), (pf->columns + 1));
+        memcpy(retval[i], pf->terain[i], sizeof (char) * pf->columns);
     }
 
     return retval;
@@ -214,8 +219,39 @@ int rmv_unit(playfield *pf, unit* target) {
     return 0; //not tested
 }
 
+unit *get_unit(playfield *pf, int index) {
+    unit *retval = NULL;
+    int i;
+    
+    for(i = 0; i < UNIT_ARRAY; i++) {
+        if(pf->units[i]->ID == index) {
+            retval = pf->units[i];
+            break;
+        }
+    }
+    
+    return retval;
+}
+
+unit *get_unit_on_coords(playfield *pf, int x, int z) {
+    unit *retval = NULL;
+    int i;
+    
+    for(i = 0; i < UNIT_ARRAY; i++) {
+        if(pf->units[i]->coord_x == x && pf->units[i]->coord_z == z) {
+            if(pf->units[i]->type != FLAG && !pf->units[i]->dead) {
+                retval = pf->units[i];
+                break;
+            } 
+        }
+    }
+    
+    return retval;
+}
+
 char *parse_unit(unit *target) {
     char retval[BUFFER_LENGTH];
+    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
     //ID|TYPE|ALLE|HP|DMG|MOVRANGE|ATKRANGE|DEAD|X|Z
     snprintf(retval, BUFFER_LENGTH, "%d|%c|%c|%d|%d|%d|%d|%c|%d|%d", target->ID, target->type, target->al,
             target->health, target->damage, target->move_range, target->attack_range, (target->dead) ? 'T' : 'F',

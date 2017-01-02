@@ -58,7 +58,7 @@ public class Parser {
                         String hlp = "";
                         for(int j = 0; j < dataCount; j++) {
                             hlp += tmp[2 + j + i*dataCount];
-                            hlp += "|"; //TODO: stopgap measure
+                            hlp += "|"; //HACK: stopgap measure
                         }
                         hlp = hlp.substring(0, hlp.length()-1);
                         array[i] = hlp;

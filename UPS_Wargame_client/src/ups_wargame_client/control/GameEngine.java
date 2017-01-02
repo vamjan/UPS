@@ -5,6 +5,8 @@
  */
 package ups_wargame_client.control;
 
+import javafx.application.Platform;
+import ups_wargame_client.data_model.IGameData;
 import ups_wargame_client.net_interface.MsgType;
 
 /**
@@ -13,7 +15,7 @@ import ups_wargame_client.net_interface.MsgType;
  */
 public class GameEngine implements Runnable {
 
-    final long TIMEOUT = 1500;
+    private final long TIMEOUT = 1500;
 
     private ClientController controller = null;
     private boolean running = true;
@@ -28,7 +30,7 @@ public class GameEngine implements Runnable {
         Command input = null;
         Command output = null;
         long currentTime = System.currentTimeMillis();
-        
+
         while (running) {
             input = controller.retrieveInput();
             output = controller.retrieveOutput();
@@ -61,7 +63,7 @@ public class GameEngine implements Runnable {
                 out = 0;
             }
 
-            update();
+            //update();
             render();
         }
 
@@ -76,10 +78,15 @@ public class GameEngine implements Runnable {
     }
 
     private void render() {
-        /*try {
-            Thread.sleep(10);
-        } catch (InterruptedException ie) {
-        }*/
+        IGameData data = controller.getGameData();
+        if (data != null) {
+            Platform.runLater(() -> {
+                if (data.isUpdated()) {
+                    data.getUpdates();
+                    controller.getView().redraw(data);
+                }
+            });
+        }
     }
 
     private void block() {

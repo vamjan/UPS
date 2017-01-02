@@ -47,6 +47,7 @@ typedef struct {
     int client_count;
     int active_clients;
     int active_lobbies;
+    int port;
     client_data **clients;
     lobby **lobbies;
 } server_data;
@@ -66,7 +67,10 @@ command *execute_command(command *c, client_data *client, int *client_index, int
 void broadcast(command *c);
 void broadcast_lobby(command *c, lobby *l);
 
-char **parse_game_info(lobby *l, client_data *c);
+char **parse_move(int ID, int coordX, int coordZ);
+char **parse_attack(unit *attacker, unit *target);
+char **parse_capture(unit *capturer, unit *captured);
+char **parse_game_info(lobby *l);
 void turn_update(command *c, lobby *l);
 
 #endif /* NET_INTERFACE_H */

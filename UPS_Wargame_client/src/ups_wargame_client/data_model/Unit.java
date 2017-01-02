@@ -62,17 +62,19 @@ public class Unit {
     }
 
     public boolean isAttackable(char al) {
-        return (this.al == al) && (this.type != 'F');
+        return (this.al != al) && (this.type != 'F');
     }
     
     public void move(int r, int q) {
-        this.setCoordX(r);
-        this.setCoordZ(q);
+        this.setCoordX(q);
+        this.setCoordZ(r);
     }
     
-    public void attack(Unit target) {
-        int newHealth = target.getHealth() - this.damage;
-        target.setHealth(newHealth);
+    public void attack(int newHealth) {
+        this.setHealth(newHealth);
+        if(newHealth <= 0) {
+            this.setDead(true);
+        }
     }
     
     public void capture(Unit target) {
@@ -205,7 +207,8 @@ public class Unit {
 
     @Override
     public String toString() {
-        return String.format("Unit: %d - %d|%d", this.hashCode(), this.getCoordX(), this.getCoordZ());
+        String type = (this.getType() == 'I') ? "INFANTRY" : (this.getType() == 'T') ? "TANK" : "SPG";
+        return String.format("Unit %c - %s: - %d", this.getAllegiance(), type, this.getHealth());
     }
     
     public static Unit parseUnit(String args[]) {

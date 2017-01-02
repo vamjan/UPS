@@ -8,6 +8,7 @@
 #include "hex.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 unit *create_unit(int coord_x, int coord_z, unittype type, allegiance al, short ID) {
     unit *tmp = malloc(sizeof(unit));
@@ -38,21 +39,48 @@ int destroy_unit(unit **u) {
     return 1;
 }
 
-int change_allegiance(unit* target, allegiance al) {
-    logger("INFO", "Changing allegiance");
-    target->al = al;
+int change_allegiance(unit* target, char al) {
+    switch(al) {
+        case 'B':
+            target->al = BLU;
+            return 1;
+        case 'R':
+            target->al = RED;
+            return 1;
+        default:
+            return 0;
+    }
 }
 
 int deal_damage(unit *target, short amount) {
-    target->health -= amount;
+    //TODO: randomise
+    srand(time(NULL));
+    int r = rand()%(int)(amount*0.4);
+    r -= r/2;
+    target->health -= (amount + r);
     logger("INFO", "Dealing damage");
     if(target->health <= 0) {
         target->dead = 1;
         logger("INFO", "Unit is dead");
     }
+    return target->health;
+}
+
+int attack_unit(unit *source, unit *target) {
+    if(check_range(source->coord_x, source->coord_z, target->coord_x, target->coord_z, source->attack_range) && !target->dead) {
+        deal_damage(target, source->damage);
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 int move_unit(unit *target, int coord_x, int coord_z) {
-    target->coord_x = coord_x;
-    target->coord_z = coord_z;
+    if(check_range(target->coord_x, target->coord_z, coord_x, coord_z, target->move_range)) {
+        target->coord_x = coord_x;
+        target->coord_z = coord_z;
+        return 1;
+    } else {
+        return 0;
+    }
 }

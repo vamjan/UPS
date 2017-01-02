@@ -7,6 +7,9 @@ package ups_wargame_client.control;
 
 import java.security.SecureRandom;
 import java.util.LinkedList;
+import java.util.List;
+import ups_wargame_client.data_model.GameData;
+import ups_wargame_client.data_model.IGameData;
 import ups_wargame_client.views.IViewable;
 
 /**
@@ -28,6 +31,7 @@ public class ClientController implements IController {
     private GameEngine engine = null;
     private Thread engineThread = null;
     private final int clientID;
+    private GameData gameData = null;
 
     private ClientController() {
         commandRunner = new CommandRunner(this);
@@ -136,6 +140,7 @@ public class ClientController implements IController {
 
     }
     
+    @Override
     public int getClientID() {
         return this.clientID;
     }
@@ -153,5 +158,28 @@ public class ClientController implements IController {
         }
         
         return s;
+    }
+
+    @Override
+    public IGameData getGameData() {
+        return this.gameData;
+    }
+    
+    public void setupGameData(int rows, String[] map) {
+        int cols = map[0].length();
+        char[][] tmp = new char[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            tmp[i] = map[i].toCharArray();
+        }
+        this.gameData = new GameData(rows, cols, tmp);
+    }
+
+    public void setUnits(List list) {
+        this.gameData.setUnits(list);
+        viewController.startGame(this.gameData);
+    }
+
+    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int unitID, char player) {
+        this.gameData.updateScore(playerBlu, playerRed, scoreBlu, scoreRed, unitID, player);
     }
 }

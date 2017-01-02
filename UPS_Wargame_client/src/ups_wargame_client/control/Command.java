@@ -65,6 +65,12 @@ public class Command {
                 return true;
             case LEAVE_LOBBY:
                 return true;
+            case MOVE:
+                return true;
+            case ATTACK:
+                return true;
+            case CAPTURE:
+                return true;
             default:
                 return false;
         }

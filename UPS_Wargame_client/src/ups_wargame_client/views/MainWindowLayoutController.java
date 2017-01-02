@@ -8,7 +8,6 @@ package ups_wargame_client.views;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.function.UnaryOperator;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -58,7 +57,7 @@ public class MainWindowLayoutController implements Initializable {
                 try {
                     portNum = Integer.parseInt(port);
 
-                    if (!ClientController.getInstance().setupConnection(serverName, portNum, name)) {
+                    if (!ClientController.getInstance().setupConnection(serverName, portNum, name.replace("|", ""))) {
                         Alert alert = new Alert(AlertType.ERROR);
                         alert.setTitle("Connection not possible");
                         alert.setHeaderText("I was unable to connect");

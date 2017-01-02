@@ -139,7 +139,7 @@ command *parse_string(const char *msg) {
 char *parse_command(const command *command) {
     char retval[BUFFER_LENGTH], *data;
 
-    memset(retval, 0, sizeof (retval));
+    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
 
     if (command->length) {
         data = parse_data(command->data, command->length);
@@ -156,7 +156,7 @@ char *parse_data(char **data, const int length) {
     char retval[BUFFER_LENGTH];
     int i, size = 0;
 
-    memset(retval, 0, sizeof (retval));
+    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
 
     for (i = 0; i < length; i++) {
         memcpy(retval + size, data[i], strlen(data[i]));
@@ -169,9 +169,8 @@ char *parse_data(char **data, const int length) {
 
 char *parse_output(const command *command) {
     char retval[BUFFER_LENGTH];
-
-    memset(retval, 0, sizeof (retval));
-
+    
+    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
     snprintf(retval, BUFFER_LENGTH, "%s\n", parse_command(command));
 
     return strdup(retval);

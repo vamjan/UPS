@@ -5,10 +5,11 @@
  */
 package ups_wargame_client.data_model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import ups_wargame_client.control.ClientController;
+import ups_wargame_client.control.Command;
+import ups_wargame_client.control.IController;
+import ups_wargame_client.net_interface.MsgType;
 
 /**
  *
@@ -25,93 +26,47 @@ public class GameData implements IGameData {
     private int blueScore;
     private int redScore;
 
-    private boolean waiting;
+    private boolean updated = false;
     private boolean attacking;
     private char userAllegiance;
-
-    public GameData() {
-        this.playfield = new Playfield(10, 15);
-
-        for (int i = 0; i < playfield.getRows(); i++) {
-            Arrays.fill(playfield.getMap()[i], 'G');
-        }
-
-        Random rnd = new Random();
-        for (int i = 0; i < 10; i++) {
-            int x = rnd.nextInt(10), y = rnd.nextInt(15);
-            playfield.getMap()[x][y] = 'D';
-        }
-
-        this.units = new ArrayList();
-
-        /*Unit tmp = new Unit(0, 0, 'S');
-        tmp.setAllegiance('B');
-        this.units.add(tmp);
-        tmp = new Unit(1, 0, 'S');
-        tmp.setAllegiance('R');
-        this.units.add(tmp);
-        tmp = new Unit(2, 0, 'I');
-        tmp.setAllegiance('R');
-        this.units.add(tmp);
-        tmp = new Unit(3, 0, 'T');
-        tmp.setAllegiance('B');
-        this.units.add(tmp);
-        tmp = new Unit(4, 0, 'T');
-        tmp.setAllegiance('B');
-        this.units.add(tmp);
-        tmp = new Unit(5, 0, 'T');
-        tmp.setAllegiance('R');
-        this.units.add(tmp);
-        tmp = new Unit(6, 0, 'T');
-        tmp.setAllegiance('B');
-        this.units.add(tmp);
-        tmp = new Unit(7, 0, 'S');
-        tmp.setAllegiance('R');
-        this.units.add(tmp);
-        tmp = new Unit(8, 0, 'S');
-        tmp.setAllegiance('B');
-        this.units.add(tmp);
-        tmp = new Unit(9, 0, 'S');
-        tmp.setAllegiance('R');
-        this.units.add(tmp);*/
-
-    }
 
     public GameData(int rows, int cols, char[][] map) {
         this.playfield = new Playfield(rows, cols);
         this.playfield.setMap(map);
     }
-    
+
     public void updateScore(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int onTurnID, char player) {
         this.playerBlue = playerBlu;
         this.playerRed = playerRed;
         this.blueScore = scoreBlu;
         this.redScore = scoreRed;
         this.userAllegiance = player;
-        this.onTurn = getUnitByID(onTurnID);
+        this.setUnitOnTurn(getUnitByID(onTurnID));
+        this.attacking = false;
     }
 
+    @Override
+    public void setUnitOnTurn(Unit val) {
+        if (onTurn != null) {
+            Unit first = units.remove(0);
+            units.add(first);
+        }
+        this.onTurn = val;
+    }
+
+    @Override
     public Unit getUnitOnTurn() {
         return this.onTurn;
     }
-    
-    public Unit incrementTurn() {
-        /*Unit retval = null;
-        onTurnIndex++;
-        while ((retval = units.get(onTurnIndex % units.size())).getType() == 'F') {
-            onTurnIndex++;
-        }
-        return retval;*/
-        return null;
-    }
 
-    public boolean playerOnTurn(char al) {
-        return this.onTurn.getAllegiance() == al;
+    @Override
+    public boolean playerOnTurn() {
+        return this.onTurn.getAllegiance() == this.userAllegiance;
     }
 
     public boolean checkOccupied(int r, int q) {
         for (Unit val : units) {
-            if (val.getCoordX() == r && val.getCoordZ() == q) {
+            if (val.getCoordX() == q && val.getCoordZ() == r) {
                 if (val.isMovable()) {
                     return true;
                 }
@@ -119,17 +74,26 @@ public class GameData implements IGameData {
         }
         return false;
     }
-    
+
     @Override
     public Unit getUnitOnCoords(int r, int q) {
         for (Unit val : units) {
-            if (val.getCoordX() == r && val.getCoordZ() == q) {
+            if (val.getType() != 'F' && !val.isDead() && val.getCoordX() == q && val.getCoordZ() == r) {
                 return val;
             }
         }
         return null;
     }
-    
+
+    public Unit getFlagOnCoords(int r, int q) {
+        for (Unit val : units) {
+            if (val.getType() == 'F' && val.getCoordX() == q && val.getCoordZ() == r) {
+                return val;
+            }
+        }
+        return null;
+    }
+
     @Override
     public Unit getUnitByID(int ID) {
         for (Unit val : units) {
@@ -140,26 +104,67 @@ public class GameData implements IGameData {
         return null;
     }
 
-    public boolean play(int r, int q) {
+    @Override
+    public boolean isUpdated() {
+        return this.updated;
+    }
+
+    @Override
+    public void setUpdated(boolean val) {
+        this.updated = val;
+    }
+
+    @Override
+    public GameData getUpdates() {
+        this.updated = false;
+        return this;
+    }
+
+    @Override
+    public boolean play(int row, int col) {
         Unit unit = this.getUnitOnTurn();
-        unit.setMoveRange(10); //temporary
-        unit.setAttackRange(10);
-        
+        IController control = ClientController.getInstance(); //HACK - this should not be dependent on control package
+
+        if (this.playerOnTurn()) {
+            if (attacking) {
+                //TODO: check attack range
+                Unit attacked = getUnitOnCoords(row, col);
+                if (attacked != null && attacked.isAttackable(userAllegiance)) {
+                    Object o[] = {unit.getID(), attacked.getID()};
+                    control.addToOutputQueue(new Command(control.getClientID(), MsgType.ATTACK, (short) 2, o));
+                }
+            } else {
+                //TODO: check move range
+                Unit capture = getUnitOnCoords(row, col); //check occupied
+                if (capture == null) {
+                    Object o[] = {unit.getID(), row, col};
+                    control.addToOutputQueue(new Command(control.getClientID(), MsgType.MOVE, (short) 3, o));
+                } else {
+                    return false; //occupied
+                }
+                capture = getFlagOnCoords(row, col); //check capture, might be worth it to move this to move ACK
+                if (capture != null && capture.isCapturable(this.userAllegiance)) {
+                    Object p[] = {unit.getID(), capture.getID()};
+                    control.addToOutputQueue(new Command(control.getClientID(), MsgType.CAPTURE, (short) 2, p));
+                }
+            }
+        } else {
+            return false;
+        }
+
         return true;
     }
 
-    public void skip() {
-        
-    }
-
+    @Override
     public Playfield getPlayField() {
         return playfield;
     }
 
+    @Override
     public List<Unit> getUnits() {
         return units;
     }
-    
+
     public void setUnits(List<Unit> units) {
         this.units = units;
     }
@@ -167,6 +172,7 @@ public class GameData implements IGameData {
     /**
      * @return the playerBlue
      */
+    @Override
     public String getPlayerBlue() {
         return playerBlue;
     }
@@ -174,6 +180,7 @@ public class GameData implements IGameData {
     /**
      * @return the playerRed
      */
+    @Override
     public String getPlayerRed() {
         return playerRed;
     }
@@ -181,6 +188,7 @@ public class GameData implements IGameData {
     /**
      * @return the blueScore
      */
+    @Override
     public int getBlueScore() {
         return blueScore;
     }
@@ -188,6 +196,7 @@ public class GameData implements IGameData {
     /**
      * @return the redScore
      */
+    @Override
     public int getRedScore() {
         return redScore;
     }
@@ -197,5 +206,15 @@ public class GameData implements IGameData {
      */
     public char getUserAllegiance() {
         return userAllegiance;
+    }
+
+    @Override
+    public void setAttacking(boolean val) {
+        this.attacking = val;
+    }
+
+    @Override
+    public boolean getAttacking() {
+        return this.attacking;
     }
 }

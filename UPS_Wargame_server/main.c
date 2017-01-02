@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <string.h>
 #include "server.h"
 #include "sini_log.h"
 #include "lobby.h"
@@ -38,17 +39,37 @@ void print_server_data(server_data *server) {
             printf("Lobby: %d\tEMPTY\n", i);
     }
 }
+
+void help(int argc) {
+    printf("Invalid arguments - %d\n", argc);
+    printf("Run with two arguments. Number of clients and port.\n");
+}
 /*
  * 
  */
 int main(int argc, char** argv) {
 
     char input;
+    char *tmp;
     int run = 1, max_clients = 12;
-    pthread_t thread;
-    
+    pthread_t thread;   
     server_data server;
-    server.max_clients = max_clients;
+    if(argc == 3) {
+        server.max_clients = strtol(argv[1], &tmp, 10);
+        if(strcmp(tmp, "")) {
+            help(argc);
+            return EXIT_FAILURE;
+        }
+        server.port = strtol(argv[2], &tmp, 10);
+        if(strcmp(tmp, "") || (server.port < 0 && server.port > 65535)) {
+            help(argc);
+            return EXIT_FAILURE;
+        }
+    } else {
+        help(argc);
+        return EXIT_FAILURE;
+    }
+    
     server.max_lobbies = server.max_clients / 2;
     server.client_count = 0;
     server.active_clients = 0;
@@ -61,12 +82,19 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Error creating thread\n");
         return EXIT_FAILURE;
     }
+    
+    /*playfield pf = *create_playfield(10, 15);
+    create_hex_map(&pf);
+    print_playfield(&pf);
+    
+    run = 0;*/
 
     while (run) {
         scanf("%c", &input);
 
         switch (input) {
             case 'h':
+                printf("Run with two arguments. Number of clients and port.");
                 printf("Press 'q' to exit.\n");
                 printf("Press 'w' to write server info.\n");
                 break;
