@@ -19,14 +19,23 @@
 #define DEFAULT_ROWS 10
 #define DEFAULT_COLS 15
 
+/**
+ * Unit types
+ */
 typedef enum {
     INFANTRY = 'I', TANK = 'T', SPG = 'S', FLAG = 'F'
 } unittype;
 
+/**
+ * Player and unit allegiances
+ */
 typedef enum {
     BLU = 'B', RED = 'R', NEUTRAL = 'N'
 } allegiance;
 
+/**
+ * Structure to store unit data
+ */
 typedef struct {
     short ID;
     unittype type;
@@ -42,12 +51,16 @@ typedef struct {
 
 //static const unit empty = {0};
 
+/**
+ * Structure to store playfield data
+ */
 typedef struct {
     char** terain;
     unit** units;
     int rows;
     int columns;
     int on_turn;
+    int attacking;
     int score_one;
     int score_two;
 } playfield;

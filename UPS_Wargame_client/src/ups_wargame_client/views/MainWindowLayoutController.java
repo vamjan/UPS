@@ -41,6 +41,8 @@ public class MainWindowLayoutController implements Initializable {
     private TextField serverTF;
     @FXML
     private TextField portTF;
+    @FXML
+    private TextField idTF;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -56,6 +58,11 @@ public class MainWindowLayoutController implements Initializable {
 
                 try {
                     portNum = Integer.parseInt(port);
+                    
+                    if(!idTF.getText().equals("")) {
+                        int ID = (int)Long.parseLong(idTF.getText(), 16);
+                        ClientController.getInstance().setupID(ID);
+                    }
 
                     if (!ClientController.getInstance().setupConnection(serverName, portNum, name.replace("|", ""))) {
                         Alert alert = new Alert(AlertType.ERROR);

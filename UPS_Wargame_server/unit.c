@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 #include "sini_log.h"
 #include "hex.h"
@@ -10,6 +5,15 @@
 #include <unistd.h>
 #include <time.h>
 
+/**
+ * Allocate memory and create unit.
+ * @param coord_x
+ * @param coord_z
+ * @param type
+ * @param al
+ * @param ID
+ * @return 
+ */
 unit *create_unit(int coord_x, int coord_z, unittype type, allegiance al, short ID) {
     unit *tmp = malloc(sizeof(unit));
     
@@ -25,6 +29,11 @@ unit *create_unit(int coord_x, int coord_z, unittype type, allegiance al, short 
     return tmp;
 }
 
+/**
+ * Free unit and all its components.
+ * @param u
+ * @return 
+ */
 int destroy_unit(unit **u) {
     logger("INFO", "Destroying unit");
     
@@ -39,6 +48,12 @@ int destroy_unit(unit **u) {
     return 1;
 }
 
+/**
+ * Change allegiance of unit into a new one.
+ * @param target
+ * @param al
+ * @return 
+ */
 int change_allegiance(unit* target, char al) {
     switch(al) {
         case 'B':
@@ -52,9 +67,14 @@ int change_allegiance(unit* target, char al) {
     }
 }
 
+/**
+ * Deal damage to selected unit. Slightly randomised by 20% margin.
+ * @param target
+ * @param amount
+ * @return 
+ */
 int deal_damage(unit *target, short amount) {
-    //TODO: randomise
-    srand(time(NULL));
+    srand(time(NULL)); //randomise dmg +-20%
     int r = rand()%(int)(amount*0.4);
     r -= r/2;
     target->health -= (amount + r);
@@ -66,6 +86,12 @@ int deal_damage(unit *target, short amount) {
     return target->health;
 }
 
+/**
+ * Attack selected unit. Checks range before and returns value according to that.
+ * @param source
+ * @param target
+ * @return 
+ */
 int attack_unit(unit *source, unit *target) {
     if(check_range(source->coord_x, source->coord_z, target->coord_x, target->coord_z, source->attack_range) && !target->dead) {
         deal_damage(target, source->damage);
@@ -75,6 +101,13 @@ int attack_unit(unit *source, unit *target) {
     }
 }
 
+/**
+ * Move unit to point given by axial coordinates. Checks range before and returns value according to that.
+ * @param target
+ * @param coord_x
+ * @param coord_z
+ * @return 
+ */
 int move_unit(unit *target, int coord_x, int coord_z) {
     if(check_range(target->coord_x, target->coord_z, coord_x, coord_z, target->move_range)) {
         target->coord_x = coord_x;

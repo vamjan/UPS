@@ -32,8 +32,8 @@
                 <ListView  fx:id="gameInfo" prefHeight="530.0" prefWidth="300.0" />
                 <ButtonBar fx:id="gameButtonBar" layoutX="309.0" layoutY="707.0" prefHeight="40.0" prefWidth="687.0">
                     <buttons>
-                        <Button fx:id="concedeButton" mnemonicParsing="false" text="Concede" />
-                        <Button fx:id="skipButton" mnemonicParsing="false" text="Skip" />
+                        <Button fx:id="concedeButton" mnemonicParsing="false" text="Leave" />
+                        <Button fx:id="skipButton" mnemonicParsing="false" text="Next" />
                     </buttons>
                 </ButtonBar>
             </children>

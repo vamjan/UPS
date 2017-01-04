@@ -34,10 +34,6 @@ public class ClientOutputThread {
         }
     }
 
-    public void start() {
-
-    }
-
     public void stop() {
         try {
             if (streamOut != null) {

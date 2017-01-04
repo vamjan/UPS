@@ -54,7 +54,7 @@ public class ClientInputThread implements Runnable {
         try {
             streamIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException ioe) {
-            System.err.println("[IN]: Error getting input stream: " + ioe);
+            System.err.println("[IN]: Error getting input stream: " + ioe.getMessage());
         }
     }
 
@@ -64,7 +64,7 @@ public class ClientInputThread implements Runnable {
                 streamIn.close();
             }
         } catch (IOException ioe) {
-            System.err.println("[IN]: Error closing input stream: " + ioe);
+            System.err.println("[IN]: Error closing input stream: " + ioe.getMessage());
         }
     }
 

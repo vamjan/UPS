@@ -8,6 +8,7 @@ package ups_wargame_client.control;
 import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
+import javafx.application.Platform;
 import ups_wargame_client.data_model.GameData;
 import ups_wargame_client.data_model.IGameData;
 import ups_wargame_client.views.IViewable;
@@ -30,7 +31,7 @@ public class ClientController implements IController {
 
     private GameEngine engine = null;
     private Thread engineThread = null;
-    private final int clientID;
+    private int clientID;
     private GameData gameData = null;
 
     private ClientController() {
@@ -70,6 +71,10 @@ public class ClientController implements IController {
         this.engineThread = new Thread(e);
         this.engineThread.start();
 
+        this.inputQueue.clear();
+        this.ackQueue.clear();
+        this.outputQueue.clear();
+
         System.out.println("Engine setup!");
     }
 
@@ -81,6 +86,10 @@ public class ClientController implements IController {
         }
     }
     
+    public void setupID(int ID) {
+        this.clientID = ID;
+    }
+
     public void startConnection() {
         commandRunner.startConnection();
     }
@@ -97,13 +106,13 @@ public class ClientController implements IController {
 
     @Override
     public void sendCommand(Command c) { //from client to server
-       commandRunner.runOutputCommand(c);
+        commandRunner.runOutputCommand(c);
     }
 
     public void recieveCommand(Command c) { //from server to client
         commandRunner.runInputCommand(c);
     }
-    
+
     public void addToAckQueue(Command c) {
         ackQueue.add(c);
     }
@@ -123,7 +132,7 @@ public class ClientController implements IController {
             engine.notifyAll();
         }
     }
-    
+
     public Command retrieveAck() {
         return ackQueue.poll();
     }
@@ -139,24 +148,24 @@ public class ClientController implements IController {
         return outputQueue.poll();
 
     }
-    
+
     @Override
     public int getClientID() {
         return this.clientID;
     }
-    
+
     public IViewable getView() {
         return this.viewController;
     }
-    
+
     public String getAckString() {
         String s = "";
-        
-        while(!ackQueue.isEmpty()) {
+
+        while (!ackQueue.isEmpty()) {
             s += ackQueue.poll().toString();
             s += '\n';
         }
-        
+
         return s;
     }
 
@@ -164,7 +173,7 @@ public class ClientController implements IController {
     public IGameData getGameData() {
         return this.gameData;
     }
-    
+
     public void setupGameData(int rows, String[] map) {
         int cols = map[0].length();
         char[][] tmp = new char[rows][cols];
@@ -176,10 +185,12 @@ public class ClientController implements IController {
 
     public void setUnits(List list) {
         this.gameData.setUnits(list);
-        viewController.startGame(this.gameData);
+        Platform.runLater(() -> { //must be here otherwise it causes random nullpointer exceptions
+            viewController.startGame(this.gameData);
+        });
     }
 
-    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int unitID, char player) {
-        this.gameData.updateScore(playerBlu, playerRed, scoreBlu, scoreRed, unitID, player);
+    public void updatePlayers(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int unitID, boolean attacking, char player) {
+        this.gameData.updateScore(playerBlu, playerRed, scoreBlu, scoreRed, unitID, attacking, player);
     }
 }

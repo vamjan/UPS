@@ -12,13 +12,13 @@ package ups_wargame_client.net_interface;
 public enum MsgType {
     CONNECT('C'), //sync ID with server
     MESSAGE('M'), //send or recieve text message to other clients
-    //ERROR('R'), //send or recieve msg describing some error on client/server
+    RECONNECT('R'), //recieve a message saying you are able to reconnect/say you want to reconnect to active game
     DISCONNECT('D'), //server or client is disconnecting client
     GET_SERVER('G'), //get available server data
     
     START('S'), //command server to start game or server sending msg that game is starting
     UNITS('I'), //send units from server
-    UPDATE('U'),
+    UPDATE('U'), //get score and player update
     
     END('E'), //server or client ended the game session
     MOVE('O'), //move unit from [X1, Y1] to [X2, Y2]

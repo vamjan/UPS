@@ -27,6 +27,7 @@ public interface IGameData {
     public int getBlueScore();
     public int getRedScore();
     public boolean play(int r, int q);
+    public void capture(int capturerID, int flagRow, int flagCol);
     public void setAttacking(boolean val);
     public boolean getAttacking();
 }

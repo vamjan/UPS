@@ -16,19 +16,24 @@
 
 #define DELIM "|"
 
+/**
+ * Message types
+ */
 typedef enum {
-    ACK = 'X',
-    NACK = 'Y',
-    MESSAGE = 'M',
+    ACK = 'X', //acknowledge message, only output
+    NACK = 'Y', //refuse command, only output
+    MESSAGE = 'M', //send chat messages
     CONNECT = 'C', //sync ID with server
+    RECONNECT = 'R', //send to client if he can reconnect to game/client sends back R or nothing
+    DISCONNECT = 'D', //send to client if opponent left
     GET_SERVER = 'G', //get available server data
     CREATE_LOBBY = 'L', //create lobby/lobby is created and is waiting for you
     JOIN_LOBBY = 'J', //join open lobby
     LEAVE_LOBBY = 'V', //leave open lobby/you were kicked from lobby
-    TOGGLE_READY = 'T',
-    START = 'S',
-    UNITS = 'I',
-    UPDATE = 'U',
+    TOGGLE_READY = 'T', //toggle ready status, only input
+    START = 'S', //start game and send map layout, only output
+    UNITS = 'I', //send unit data, only output
+    UPDATE = 'U', //send game data, only output
     END = 'E', //server or client ended the game session
     MOVE = 'O', //move unit from [X1, Y1] to [X2, Y2]
     ATTACK = 'A', //unit A attacks unit B for X dmg

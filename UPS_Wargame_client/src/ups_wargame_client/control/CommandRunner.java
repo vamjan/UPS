@@ -45,6 +45,16 @@ public class CommandRunner {
             switch (command.type) {
                 case CONNECT:
                     break;
+                case DISCONNECT: //my opponent left, will i wait or end?
+                    Platform.runLater(() -> {
+                        controller.getView().showWait();
+                    });
+                    break;
+                case RECONNECT:
+                    Platform.runLater(() -> {
+                        controller.getView().showReconnect(Integer.parseInt((String) command.data[0]));
+                    });
+                    break;
                 case MESSAGE:
                     controller.getView().showServerMessage("[Server]: ", command.toString()); //onlz message in the future
                     break;
@@ -61,7 +71,7 @@ public class CommandRunner {
                 case NACK:
                     tmp = controller.retrieveAck();
                     if (tmp == null) {
-                        System.err.println("No ACK required");
+                        System.err.println("No NACK required");
                     } else {
                         nackCommand(tmp);
                     }
@@ -86,15 +96,11 @@ public class CommandRunner {
                     controller.setupGameData(command.length, stringArray);
                     break;
                 case UNITS:
-                    Platform.runLater(() -> {
                     controller.setUnits(parseUnits(command));
-                    });
                     break;
                 case UPDATE:
-                    Platform.runLater(() -> {
-                        this.updateScore(command);
-                        controller.getGameData().setUpdated(true);
-                    });
+                    this.updateScore(command);
+                    controller.getGameData().setUpdated(true);
                     break;
                 case MOVE:
                     Unit target = controller.getGameData().getUnitByID(Integer.parseInt((String) command.data[0]));
@@ -160,6 +166,7 @@ public class CommandRunner {
             case MOVE:
                 controller.getGameData().setAttacking(true);
                 controller.getGameData().setUpdated(true);
+                controller.getGameData().capture((int)command.data[0], (int)command.data[1], (int)command.data[2]); //safe conversion since command never left client
                 break;
             case ATTACK:
                 controller.getGameData().setAttacking(false);
@@ -182,6 +189,12 @@ public class CommandRunner {
                 controller.getGameData().setUpdated(true);
                 Platform.runLater(() -> {
                     controller.getView().showLobbyMessage("[Server]: ", "Can't attack there.");
+                });
+                break;
+            case CONNECT:
+                System.out.println("Invalid ID!");
+                Platform.runLater(() -> {
+                    controller.getView().backToStart();
                 });
                 break;
             default:
@@ -278,7 +291,8 @@ public class CommandRunner {
                     Integer.parseInt((String) c.data[2]),
                     Integer.parseInt((String) c.data[3]),
                     Integer.parseInt((String) c.data[4]),
-                    ((String) c.data[5]).charAt(0));
+                    ((String) c.data[5]).charAt(0) == 'T',
+                    ((String) c.data[6]).charAt(0));
         } catch (NumberFormatException | ClassCastException nfe) {
             System.err.println("I can't work with this: " + c);
         }

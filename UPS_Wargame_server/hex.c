@@ -1,7 +1,9 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This module represents the game state and contains functions to work with it 
+ * and to run the game itself.
+ * This module is using flat-toped even-r hexagons
+ * Jan Vampol
+ * UPS
  */
 
 
@@ -15,8 +17,12 @@
 
 extern char *strdup(const char *s);
 
-/*
- *
+/**
+ * Allocate the memory and create playfield. Setup to default state. Also allocates
+ * unit array but does not fill it with units yet.
+ * @param rows
+ * @param columns
+ * @return 
  */
 playfield *create_playfield(int rows, int columns) {
     int i, j;
@@ -41,10 +47,17 @@ playfield *create_playfield(int rows, int columns) {
     pf->on_turn = 0;
     pf->score_one = 0;
     pf->score_two = 0;
+    pf->attacking = 0;
 
     return pf;
 }
 
+/**
+ * Create a map from premade map and save it to the playfield.
+ * Fill unit array with units.
+ * @param pf
+ * @return 
+ */
 int create_hex_map(playfield *pf) {
     int i, j;
     for (i = 0; i < pf->rows; i++) {
@@ -60,9 +73,16 @@ int create_hex_map(playfield *pf) {
     }
 }
 
+/**
+ * Get hex value with given axial coordinates. Those coordinates have to be
+ * altered as following: i = r + (q + 1) / 2
+ *                       j = q
+ * @param pf
+ * @param r
+ * @param q
+ * @return 
+ */
 char *get_hex(playfield *pf, int r, int q) {
-    // r = i
-    // q = j - r/2
     int i = r + (q + 1) / 2;
     int j = q;
     if ((i >= 0 && i < pf->rows) && (j >= 0 && j < pf->columns)) {
@@ -75,6 +95,15 @@ char *get_hex(playfield *pf, int r, int q) {
     }
 }
 
+/**
+ * Set hex value on given axial coordinates. Those coordinates have to be
+ * altered as following: i = r + (q + 1) / 2
+ *                       j = q
+ * @param pf
+ * @param r
+ * @param q
+ * @return 
+ */
 int set_hex(playfield *pf, int r, int q, char value) {
     int i = r + (q + 1) / 2;
     int j = q;
@@ -89,6 +118,11 @@ int set_hex(playfield *pf, int r, int q, char value) {
     }
 }
 
+/**
+ * Clear playfield of units and set the terrain to 0.
+ * @param pf
+ * @return 
+ */
 int clear_playfield(playfield *pf) {
     logger("INFO", "Clearing playfield");
 
@@ -109,6 +143,11 @@ int clear_playfield(playfield *pf) {
     return 1;
 }
 
+/**
+ * Destroy playfield and free all its components.
+ * @param pf
+ * @return 
+ */
 int destroy_playfield(playfield **pf) {
     logger("INFO", "Destroying playfield");
 
@@ -134,6 +173,12 @@ int destroy_playfield(playfield **pf) {
     }
 }
 
+/**
+ * Increment turn.
+ * When flags are on turn, they give score to players who captured them.
+ * @param pf
+ * @return 
+ */
 unit *next_turn(playfield *pf) {
     unit *retval = NULL;
 
@@ -151,6 +196,10 @@ unit *next_turn(playfield *pf) {
     return retval;
 }
 
+/**
+ * Print playfield into the console
+ * @param pf
+ */
 void print_playfield(playfield *pf) {
     int i, j;
 
@@ -173,6 +222,11 @@ void print_playfield(playfield *pf) {
     }
 }
 
+/**
+ * Parse map into the string to be send to clients
+ * @param pf
+ * @return 
+ */
 char **parse_map(playfield *pf) {
     char **retval = malloc(sizeof (char *) * pf->rows);
 
@@ -185,6 +239,15 @@ char **parse_map(playfield *pf) {
     return retval;
 }
 
+/**
+ * Check range of two points on the map with given range
+ * @param start_x
+ * @param start_z
+ * @param dest_x
+ * @param dest_z
+ * @param range
+ * @return 
+ */
 int check_range(int start_x, int start_z, int dest_x, int dest_z, int range) {
     int start_y = -start_x - start_z;
     int dest_y = -dest_x - dest_z;
@@ -196,6 +259,12 @@ int check_range(int start_x, int start_z, int dest_x, int dest_z, int range) {
     return 0;
 }
 
+/**
+ * Add unit to the empty place in unit array.
+ * @param pf
+ * @param target
+ * @return 
+ */
 int add_unit(playfield *pf, unit* target) {
     int i = 0;
     while (i < UNIT_ARRAY) {
@@ -207,6 +276,12 @@ int add_unit(playfield *pf, unit* target) {
     }
 }
 
+/**
+ * Remove unit from the array and make empty place.
+ * @param pf
+ * @param target
+ * @return 
+ */
 int rmv_unit(playfield *pf, unit* target) {
     int i = 0;
     while (i < UNIT_ARRAY) {
@@ -216,9 +291,15 @@ int rmv_unit(playfield *pf, unit* target) {
         }
         i++;
     }
-    return 0; //not tested
+    return 0;
 }
 
+/**
+ * Get unit on index in array.
+ * @param pf
+ * @param index
+ * @return 
+ */
 unit *get_unit(playfield *pf, int index) {
     unit *retval = NULL;
     int i;
@@ -233,6 +314,13 @@ unit *get_unit(playfield *pf, int index) {
     return retval;
 }
 
+/**
+ * Get unit on target axial coordinates
+ * @param pf
+ * @param x
+ * @param z
+ * @return 
+ */
 unit *get_unit_on_coords(playfield *pf, int x, int z) {
     unit *retval = NULL;
     int i;
@@ -249,6 +337,11 @@ unit *get_unit_on_coords(playfield *pf, int x, int z) {
     return retval;
 }
 
+/**
+ * Parse unit into string to be send via network.
+ * @param target
+ * @return 
+ */
 char *parse_unit(unit *target) {
     char retval[BUFFER_LENGTH];
     memset(retval, 0, sizeof(char) * BUFFER_LENGTH);

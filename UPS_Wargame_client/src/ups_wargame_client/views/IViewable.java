@@ -24,6 +24,8 @@ public interface IViewable {
     public void toggleConnected();
     public void refuse();
     public void acknowledge();
+    public void showReconnect(int index);
+    public void showWait();
     public void startGame(IGameData data);
     public void endGame(String winner);
     public void redraw(IGameData gd);

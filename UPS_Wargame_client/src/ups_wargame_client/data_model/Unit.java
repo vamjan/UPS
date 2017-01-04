@@ -5,6 +5,8 @@
  */
 package ups_wargame_client.data_model;
 
+import java.util.List;
+
 /**
  *
  * @author sini
@@ -12,8 +14,8 @@ package ups_wargame_client.data_model;
 public class Unit {
 
     private int ID;
-    private char type;  //S - SPG, T - TANK, I - Infantry, F - Flag ////mozna predelat na enum
-    private char al;    //N - neutral, B - player1, R - player2
+    private UnitType type;  //S - SPG, T - TANK, I - Infantry, F - Flag ////mozna predelat na enum
+    private Allegiance al;    //N - neutral, B - player1, R - player2
     private int health;
     private int damage;
     private int moveRange;
@@ -22,7 +24,7 @@ public class Unit {
     private int coordX;
     private int coordZ;
 
-    public Unit(int ID, int coord_x, int coord_z, char type) {
+    public Unit(int ID, int coord_x, int coord_z, UnitType type) {
         this.ID = ID;
         this.coordX = coord_x;
         this.coordZ = coord_z;
@@ -53,55 +55,51 @@ public class Unit {
         return false;
     }
 
+    public boolean canAttack(List<Unit> units) {
+        return false;
+    }
+
     public boolean isMovable() {
-        return this.type != 'F';
+        return this.type != UnitType.FLAG;
     }
 
-    public boolean isCapturable(char al) {
-        return (this.al != al) && (this.type == 'F');
+    public boolean isCapturable(Allegiance al) {
+        return (this.al != al) && (this.type == UnitType.FLAG);
     }
 
-    public boolean isAttackable(char al) {
-        return (this.al != al) && (this.type != 'F');
+    public boolean isAttackable(Allegiance al) {
+        return (this.al != al) && (this.type != UnitType.FLAG);
     }
-    
+
     public void move(int r, int q) {
         this.setCoordX(q);
         this.setCoordZ(r);
     }
-    
+
     public void attack(int newHealth) {
         this.setHealth(newHealth);
-        if(newHealth <= 0) {
+        if (newHealth <= 0) {
             this.setDead(true);
         }
     }
-    
+
     public void capture(Unit target) {
         target.al = this.al;
     }
 
-    public void setAllegiance(char al) {
-        if (al == 'N' || al == 'B' || al == 'R') {
-            this.al = al;
-        } else {
-            this.al = 'N';
-        }
+    public void setAllegiance(Allegiance al) {
+        this.al = al;
     }
 
-    public char getAllegiance() {
+    public Allegiance getAllegiance() {
         return this.al;
     }
 
-    public void setType(char type) {
-        if (type == 'S' || type == 'T' || type == 'I' || type == 'F') {
-            this.type = type;
-        } else {
-            this.type = 'I';
-        }
+    public void setType(UnitType type) {
+        this.type = type;
     }
 
-    public char getType() {
+    public UnitType getType() {
         return this.type;
     }
 
@@ -207,27 +205,53 @@ public class Unit {
 
     @Override
     public String toString() {
-        String type = (this.getType() == 'I') ? "INFANTRY" : (this.getType() == 'T') ? "TANK" : "SPG";
-        return String.format("Unit %c - %s: - %d", this.getAllegiance(), type, this.getHealth());
+        String type = (this.getType() == UnitType.INFANTRY) ? "INFANTRY" : (this.getType() == UnitType.TANK) ? "TANK" : (this.getType() == UnitType.SPG) ? "SPG" : "FLAG";
+        return String.format("Unit %c - %s: - %d", this.getAllegiance().getName(), type, this.getHealth());
     }
-    
+
     public static Unit parseUnit(String args[]) {
         Unit retval = null;
         //ID|TYPE|ALLE|HP|DMG|MOVRANGE|ATKRANGE|DEAD|X|Z
-        try{
+        try {
             retval = new Unit(Integer.parseInt(args[0]), Integer.parseInt(args[9]),
-                    Integer.parseInt(args[8]), args[1].charAt(0));
-            
-            retval.setAllegiance(args[2].charAt(0));
+                    Integer.parseInt(args[8]), UnitType.getUnitTypeByName(args[1].charAt(0)));
+
+            retval.setAllegiance(Allegiance.getAllegianceByName(args[2].charAt(0)));
             retval.setHealth(Integer.parseInt(args[3]));
             retval.setDamage(Integer.parseInt(args[4]));
             retval.setMoveRange(Integer.parseInt(args[3]));
             retval.setAttackRange(Integer.parseInt(args[4]));
             retval.setDead(args[7].equals("T"));
-        } catch(NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
             System.err.println("Can't create unit from arguments: " + args);
         }
-        
+
         return retval;
+    }
+
+    public enum UnitType {
+        INFANTRY('I'),
+        TANK('T'),
+        SPG('S'),
+        FLAG('F');
+        
+        private char name;
+
+        public char getName() {
+            return this.name;
+        }
+
+        private UnitType(char val) {
+            name = val;
+        }
+
+        public static UnitType getUnitTypeByName(char name) {
+            for (UnitType type : UnitType.values()) {
+                if (type.name == name) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 }

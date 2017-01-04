@@ -28,29 +28,29 @@ public class GameData implements IGameData {
 
     private boolean updated = false;
     private boolean attacking;
-    private char userAllegiance;
+    private Allegiance userAllegiance;
 
     public GameData(int rows, int cols, char[][] map) {
         this.playfield = new Playfield(rows, cols);
         this.playfield.setMap(map);
     }
 
-    public void updateScore(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int onTurnID, char player) {
+    public void updateScore(String playerBlu, String playerRed, int scoreBlu, int scoreRed, int onTurnID, boolean attacking, char player) {
         this.playerBlue = playerBlu;
         this.playerRed = playerRed;
         this.blueScore = scoreBlu;
         this.redScore = scoreRed;
-        this.userAllegiance = player;
+        this.userAllegiance = Allegiance.getAllegianceByName(player);
         this.setUnitOnTurn(getUnitByID(onTurnID));
-        this.attacking = false;
+        this.attacking = attacking;
     }
 
     @Override
     public void setUnitOnTurn(Unit val) {
-        if (onTurn != null) {
-            Unit first = units.remove(0);
-            units.add(first);
-        }
+        //if (onTurn != null) {
+        //    Unit first = units.remove(0);
+        //    units.add(first);
+        //}
         this.onTurn = val;
     }
 
@@ -78,7 +78,7 @@ public class GameData implements IGameData {
     @Override
     public Unit getUnitOnCoords(int r, int q) {
         for (Unit val : units) {
-            if (val.getType() != 'F' && !val.isDead() && val.getCoordX() == q && val.getCoordZ() == r) {
+            if (val.getType() != Unit.UnitType.FLAG && !val.isDead() && val.getCoordX() == q && val.getCoordZ() == r) {
                 return val;
             }
         }
@@ -87,7 +87,7 @@ public class GameData implements IGameData {
 
     public Unit getFlagOnCoords(int r, int q) {
         for (Unit val : units) {
-            if (val.getType() == 'F' && val.getCoordX() == q && val.getCoordZ() == r) {
+            if (val.getType() == Unit.UnitType.FLAG && val.getCoordX() == q && val.getCoordZ() == r) {
                 return val;
             }
         }
@@ -135,17 +135,12 @@ public class GameData implements IGameData {
                 }
             } else {
                 //TODO: check move range
-                Unit capture = getUnitOnCoords(row, col); //check occupied
-                if (capture == null) {
+                Unit occupied = getUnitOnCoords(row, col); //check occupied
+                if (occupied == null) {
                     Object o[] = {unit.getID(), row, col};
                     control.addToOutputQueue(new Command(control.getClientID(), MsgType.MOVE, (short) 3, o));
                 } else {
                     return false; //occupied
-                }
-                capture = getFlagOnCoords(row, col); //check capture, might be worth it to move this to move ACK
-                if (capture != null && capture.isCapturable(this.userAllegiance)) {
-                    Object p[] = {unit.getID(), capture.getID()};
-                    control.addToOutputQueue(new Command(control.getClientID(), MsgType.CAPTURE, (short) 2, p));
                 }
             }
         } else {
@@ -153,6 +148,16 @@ public class GameData implements IGameData {
         }
 
         return true;
+    }
+    
+    @Override
+    public void capture(int capturerID, int flagRow, int flagCol) {
+        Unit captured = getFlagOnCoords(flagRow, flagCol); //check capture, might be worth it to move this to move ACK
+        IController control = ClientController.getInstance(); //HACK - this should not be dependent on control package
+        if (captured != null && captured.isCapturable(this.userAllegiance)) {
+            Object p[] = {capturerID, captured.getID()};
+            control.addToOutputQueue(new Command(control.getClientID(), MsgType.CAPTURE, (short) 2, p));
+        }
     }
 
     @Override
@@ -204,7 +209,7 @@ public class GameData implements IGameData {
     /**
      * @return the playerAllegiance
      */
-    public char getUserAllegiance() {
+    public Allegiance getUserAllegiance() {
         return userAllegiance;
     }
 

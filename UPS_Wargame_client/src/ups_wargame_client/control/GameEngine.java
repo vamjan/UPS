@@ -15,7 +15,7 @@ import ups_wargame_client.net_interface.MsgType;
  */
 public class GameEngine implements Runnable {
 
-    private final long TIMEOUT = 1500;
+    private final long TIMEOUT = 1666;
 
     private ClientController controller = null;
     private boolean running = true;
@@ -36,10 +36,10 @@ public class GameEngine implements Runnable {
             output = controller.retrieveOutput();
             while (input == null && output == null) {
                 if (System.currentTimeMillis() >= (currentTime + TIMEOUT)) {
-                    System.err.println("[ENGINE]: Timed out!");
-                    if (out >= 5) {
+                    if (out > 2) {
                         controller.sendCommand(new Command(controller.getClientID(), MsgType.DISCONNECT, (short) 0, null));
                         this.stopRunning(); //TODO: fuj
+                        System.err.println("[ENGINE]: Timed out!");
                     }
                     if (running == false) {
                         break;

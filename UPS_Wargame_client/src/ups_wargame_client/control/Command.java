@@ -71,6 +71,8 @@ public class Command {
                 return true;
             case CAPTURE:
                 return true;
+            case CONNECT:
+                return true;
             default:
                 return false;
         }

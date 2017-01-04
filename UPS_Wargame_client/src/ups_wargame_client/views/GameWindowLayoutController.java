@@ -26,6 +26,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TabPane;
@@ -135,7 +136,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     public void initialize(URL url, ResourceBundle rb) {
         controller = ClientController.getInstance();
         controller.setupView(this);
-        
+
         gameInfo.setItems(obsUnits);
         lobbyList.setItems(obsLobby);
         lobbyInfo.setExpanded(false);
@@ -227,11 +228,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         concedeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if (gd.playerOnTurn()) {
-                    controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.END, (short) 0, null));
-                } else {
-                    showLobbyMessage("[Client]: ", "Not your turn!");
-                }
+                controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.END, (short) 0, null));
             }
         });
 
@@ -239,7 +236,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
             @Override
             public void handle(ActionEvent event) {
                 if (gd.playerOnTurn()) {
-                    if(gd.getAttacking()) {
+                    if (gd.getAttacking()) {
                         System.out.println("Skipping attack");
                         controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.SKIP, (short) 0, null));
                     } else {
@@ -394,6 +391,38 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         System.out.println("Action acknowledged.");
     }
 
+    @Override
+    public void showReconnect(int index) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Reconnect options");
+        alert.setHeaderText(null);
+        alert.setContentText("Do you want to reconnect to active game?");
+
+        ButtonType buttonTypeOne = new ButtonType("Yes");
+        ButtonType buttonTypeTwo = new ButtonType("No");
+
+        alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonTypeOne) {
+            Object o[] = {index};
+            controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.RECONNECT, (short) 1, o));
+            selectedLobby = obsLobby.get(index);
+            toggleConnected();
+            showLobby();
+        }
+    }
+
+    @Override
+    public void showWait() {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Game is empty");
+        alert.setHeaderText(null);
+        alert.setContentText("Your opponent has left the game.\nYou can leave any time with Concede button, or wait for him/her/it to reconnect.");
+
+        alert.showAndWait();
+    }
+
     public void setPrimaryStage(Stage stage) {
         this.mainStage = stage;
     }
@@ -418,7 +447,11 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         lobbyPane.setManaged(true);
         gamePane.setVisible(false);
         lobbyPane.setVisible(true);
-        winLabel.setText(winner + " has won the game!");
+        if (winner.equals("DRAW")) {
+            winLabel.setText("Game was a draw!");
+        } else {
+            winLabel.setText(winner + " has won the game!");
+        }
         this.gd = null;
     }
 
@@ -445,22 +478,8 @@ public class GameWindowLayoutController implements Initializable, IViewable {
 
         for (int i = 0; i < gd.getPlayField().getRows(); i++) {
             for (int j = 0; j < gd.getPlayField().getColumns(); j++) {
-                //int row = Playfield.getRow(i, j);
                 drawPoint(i, j, startX, startY, horizonstalDistance, verticalDistance,
                         hexSize, gd.getPlayField().getMap()[i][j], g2d);
-                /*if (j % 2 == 0) {
-                    this.drawHex((startX + horizonstalDistance * j) + (horizonstalDistance / 2),
-                            (startY + verticalDistance * i) + (verticalDistance / 2),
-                            (hexSize / 2), gd.getPlayField().getMap()[i][j], g2d);
-                    g2d.strokeText(j + " " + row, (startX + horizonstalDistance * j),
-                            (startY + verticalDistance * i) + (verticalDistance / 2));
-                } else {
-                    this.drawHex((startX + horizonstalDistance * j) + (horizonstalDistance / 2),
-                            (startY + verticalDistance * i),
-                            (hexSize / 2), gd.getPlayField().getMap()[i][j], g2d);
-                    g2d.strokeText(j + " " + row, (startX + horizonstalDistance * j),
-                            (startY + verticalDistance * i));
-                }*/
             }
         }
 
@@ -474,7 +493,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         }
 
         g2d.setStroke(Color.TRANSPARENT);
-        
+
         canvasField.toFront();
     }
 
@@ -543,22 +562,22 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         int index = 1;
         double width = size, height = size;
 
-        if (unit.getType() == 'I') {
+        if (unit.getType().getName() == 'I') {
             index += 2;
-        } else if (unit.getType() == 'S') {
+        } else if (unit.getType().getName() == 'S') {
             index += 4;
             height = height / 1.5;
-        } else if (unit.getType() == 'T') {
+        } else if (unit.getType().getName() == 'T') {
             index += 6;
             height = height / 1.5;
         }
 
-        if (unit.getAllegiance() == 'B') {
+        if (unit.getAllegiance().getName() == 'B') {
             g2d.drawImage(cachedImages[index],
                     x - size / 2 + width,
                     y - size / 2,
                     -width, height);
-        } else if (unit.getAllegiance() == 'R') {
+        } else if (unit.getAllegiance().getName() == 'R') {
             index++;
             g2d.drawImage(cachedImages[index],
                     x - size / 2,
@@ -580,7 +599,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
 
         g2d.clearRect(0, 0, canvasField.getWidth(), 200);
 
-        if (gd.getUnitOnTurn().getAllegiance() == 'B') {
+        if (gd.getUnitOnTurn().getAllegiance().getName() == 'B') {
             g2d.setStroke(Color.BLACK);
         }
         g2d.setFill(Color.BLUE);
@@ -599,7 +618,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
             g2d.fillText("WAITING", 285, 80);
         }
 
-        if (gd.getUnitOnTurn().getAllegiance() == 'R') {
+        if (gd.getUnitOnTurn().getAllegiance().getName() == 'R') {
             g2d.setStroke(Color.BLACK);
         }
         g2d.setFill(Color.RED);
@@ -622,11 +641,11 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         g2d.setFill(color);
         g2d.fillPolygon(coordsX, coordsY, 3);
     }
-    
+
     public void updateUnits(IGameData gd) {
         obsUnits.clear();
-        for(Unit val : gd.getUnits()) {
-            if(val.getType() != 'F' && !val.isDead()) {
+        for (Unit val : gd.getUnits()) {
+            if (val.getType() != Unit.UnitType.FLAG && !val.isDead()) {
                 obsUnits.add(val);
             }
         }

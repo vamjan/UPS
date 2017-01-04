@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /* 
  * File:   main.c
  * Author: Sini
@@ -15,10 +9,17 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #include "server.h"
 #include "sini_log.h"
 #include "lobby.h"
 
+/**
+ * Print server data into console. First clients with their ACTIVE/INACTIVE status.
+ * Second lobbies with clients inside them and their status.
+ * @param server
+ */
 void print_server_data(server_data *server) {
     int i;
     printf("Client status:\n");
@@ -40,18 +41,22 @@ void print_server_data(server_data *server) {
     }
 }
 
+/**
+ * User help.
+ * @param argc
+ */
 void help(int argc) {
     printf("Invalid arguments - %d\n", argc);
     printf("Run with two arguments. Number of clients and port.\n");
 }
+
 /*
- * 
+ * Starting function.
  */
 int main(int argc, char** argv) {
 
     char input;
     char *tmp;
-    int run = 1, max_clients = 12;
     pthread_t thread;   
     server_data server;
     if(argc == 3) {
@@ -74,6 +79,7 @@ int main(int argc, char** argv) {
     server.client_count = 0;
     server.active_clients = 0;
     server.active_lobbies = 0;
+    server.running = 1;
     server.clients = calloc(sizeof (client_data *), server.max_clients);
     server.lobbies = calloc(sizeof (lobby *), server.max_lobbies);
 
@@ -82,19 +88,13 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Error creating thread\n");
         return EXIT_FAILURE;
     }
-    
-    /*playfield pf = *create_playfield(10, 15);
-    create_hex_map(&pf);
-    print_playfield(&pf);
-    
-    run = 0;*/
 
-    while (run) {
+    while (server.running) {
         scanf("%c", &input);
 
         switch (input) {
             case 'h':
-                printf("Run with two arguments. Number of clients and port.");
+                printf("Run with two arguments. Number of clients and port.\n");
                 printf("Press 'q' to exit.\n");
                 printf("Press 'w' to write server info.\n");
                 break;
@@ -102,12 +102,15 @@ int main(int argc, char** argv) {
                 print_server_data(&server);
                 break;
             case 'q':
-                run = 0;
+                server.running = 0;
+                shutdown(server.server_socket, SHUT_RDWR);
                 break;
             default:
                 break;
         }
     }
+    
+    pthread_join(thread, NULL);
     
     return (EXIT_SUCCESS);
 }

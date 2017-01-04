@@ -9,7 +9,10 @@
 #include <string.h>
 #include "net_interface.h"
 #include "sini_log.h"
-
+/**
+ * Allocate memory and create buffer
+ * @return 
+ */
 char *create_buffer() {
     char *retval = malloc(sizeof(char) * BUFFER_LENGTH);
     
@@ -18,6 +21,11 @@ char *create_buffer() {
     return retval;
 }
 
+/**
+ * Free and destroy buffer
+ * @param buffer
+ * @return 
+ */
 int destroy_buffer(char **buffer) {
     logger("INFO", "Destroying buffer");
     
@@ -27,6 +35,14 @@ int destroy_buffer(char **buffer) {
     return 1;
 }
 
+/**
+ * Adds a message into buffer. If the buffer is full, it will drop first DROP 
+ * characters and move the rest to the start of the buffer.
+ * @param buffer
+ * @param msg
+ * @param read
+ * @return 
+ */
 int add_to_buffer(char *buffer, const char *msg, int *read) {
     logger("INFO", "Adding message to buffer...");
     int buffer_fill, msg_length;
@@ -46,6 +62,12 @@ int add_to_buffer(char *buffer, const char *msg, int *read) {
     *read = buffer_fill;
 }
 
+/**
+ * Flush characters which were already read and used.
+ * @param buffer
+ * @param read
+ * @return 
+ */
 int flush_buffer(char *buffer, const int read) {
     logger("INFO", "Flushing buffer...");
     memset(buffer, 0, sizeof(char) * read);

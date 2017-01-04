@@ -1,14 +1,9 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   parser.c
- * Author: sini
- *
- * Created on 26 November 2016, 20:58
+ * This module represents the game state and contains functions to work with it 
+ * and to run the game itself.
+ * This module is using flat-toped even-r hexagons
+ * Jan Vampol
+ * UPS
  */
 
 #include <stdio.h>
@@ -20,6 +15,14 @@
 
 extern char *strdup(const char *s);
 
+/**
+ * Allocates memory and creates command.
+ * @param id_key
+ * @param type
+ * @param length
+ * @param data
+ * @return 
+ */
 command *create_command(int id_key, msg_type type, short length, char **data) {
     command *retval = malloc(sizeof (command));
 
@@ -31,6 +34,9 @@ command *create_command(int id_key, msg_type type, short length, char **data) {
     return retval;
 }
 
+/**
+ * Create acknowledge command
+ */
 command *create_ack(int id_key, int type) {
     command *retval = malloc(sizeof (command));
 
@@ -42,6 +48,11 @@ command *create_ack(int id_key, int type) {
     return retval;
 }
 
+/**
+ * Destroy command and free its components
+ * @param command
+ * @return 
+ */
 int destroy_command(command **command) {
     logger("INFO", "Destroying command");
 
@@ -59,8 +70,20 @@ int destroy_command(command **command) {
     return 1;
 }
 
+/**
+ * Takes the input string from net_interface buffer and tries to parse it into 
+ * viable command. If succesful it returns the command.
+ * Function goes through the string until it finds the \n character, takes the 8 
+ * characters behind this character and tries to parse them into a integer. Then
+ * goes through the function backwards and looks for the matching number. Argument
+ * read makes sure this function does not read characters which were already read.
+ * 
+ * @param msg
+ * @param read
+ * @return command or NULL
+ */
 command *parse_input(const char *msg, int *read) {
-    int i, start, prev_end = *read, msg_length = strlen(msg); //TODO: bordeeel
+    int i, start, prev_end = *read, msg_length = strlen(msg);
     command *retval = NULL;
     for (i = *read; i < prev_end + msg_length; i++) {
         (*read)++;
@@ -87,6 +110,13 @@ command *parse_input(const char *msg, int *read) {
     return retval;
 }
 
+/**
+ * Check characters in string until it finds the \n character.
+ * @param msg
+ * @param id
+ * @param end
+ * @return 
+ */
 int find_command_start(const char *msg, const char *id, const int end) {
     int i = end - 8 - 1;
 
@@ -102,6 +132,13 @@ int find_command_start(const char *msg, const char *id, const int end) {
     return end;
 }
 
+/**
+ * Try to parse incoming message into command structure.
+ * Split the message with DELIMINER | and parse each argument.
+ * Command ID|TYPE|LENGTH|DATA|ID\n int|char|short|char[][]|int
+ * @param msg
+ * @return command or NULL
+ */
 command *parse_string(const char *msg) {
     int id, i;
     short length;
@@ -121,7 +158,7 @@ command *parse_string(const char *msg) {
     if (*err != '\0' && (length >= 0 && length < 32767)) return retval;
 
     data = calloc(sizeof (char *), length);
-    i = 0; //reuse
+    i = 0;
 
     token = strtok(NULL, DELIM);
     while (token && i < length) {
@@ -136,6 +173,11 @@ command *parse_string(const char *msg) {
     return retval;
 }
 
+/**
+ * Parse command into string which can be send via network to clients.
+ * @param command
+ * @return 
+ */
 char *parse_command(const command *command) {
     char retval[BUFFER_LENGTH], *data;
 
@@ -152,6 +194,12 @@ char *parse_command(const command *command) {
     return strdup(retval);
 }
 
+/**
+ * Every data entry gets a deliminer | and is added to output string.
+ * @param data
+ * @param length
+ * @return 
+ */
 char *parse_data(char **data, const int length) {
     char retval[BUFFER_LENGTH];
     int i, size = 0;
@@ -167,6 +215,11 @@ char *parse_data(char **data, const int length) {
     return strdup(retval);
 }
 
+/**
+ * Takes the parsed command and saves it as string
+ * @param command
+ * @return 
+ */
 char *parse_output(const command *command) {
     char retval[BUFFER_LENGTH];
     
@@ -176,6 +229,12 @@ char *parse_output(const command *command) {
     return strdup(retval);
 }
 
+/**
+ * Get type according to first character in command
+ * Each type is described in execute_command function and in the header file. 
+ * @param c
+ * @return 
+ */
 msg_type get_type(const char c) {
     msg_type retval;
     switch (c) {
@@ -190,6 +249,12 @@ msg_type get_type(const char c) {
             break;
         case 'C':
             retval = CONNECT;
+            break;
+        case 'R':
+            retval = RECONNECT;
+            break;
+        case 'D':
+            retval = DISCONNECT;
             break;
         case 'G':
             retval = GET_SERVER;

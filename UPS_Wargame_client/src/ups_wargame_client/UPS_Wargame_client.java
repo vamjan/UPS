@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client;
 
 import java.io.IOException;
@@ -14,11 +9,15 @@ import javafx.stage.Stage;
 import ups_wargame_client.control.ClientController;
 
 /**
- *
- * @author sini
+ * Main launch class. JavaFX Application class.
+ * @author Jan Vampol
  */
 public class UPS_Wargame_client extends Application {
-
+    
+    /**
+     * Start operation.
+     * @param stage 
+     */
     @Override
     public void start(Stage stage) {
         try {
@@ -34,6 +33,10 @@ public class UPS_Wargame_client extends Application {
         }
     }
     
+    /**
+     * Set default stop operation to close connection.
+     * @throws Exception 
+     */
     @Override
     public void stop() throws Exception {
         ClientController.getInstance().stopConnection();
@@ -41,6 +44,7 @@ public class UPS_Wargame_client extends Application {
     }
 
     /**
+     * Launch method.
      * @param args the command line arguments
      * @throws java.lang.InterruptedException
      */

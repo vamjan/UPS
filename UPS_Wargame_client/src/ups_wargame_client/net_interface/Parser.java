@@ -58,7 +58,7 @@ public class Parser {
                         String hlp = "";
                         for(int j = 0; j < dataCount; j++) {
                             hlp += tmp[2 + j + i*dataCount];
-                            hlp += "|"; //HACK: stopgap measure
+                            hlp += "|";
                         }
                         hlp = hlp.substring(0, hlp.length()-1);
                         array[i] = hlp;
@@ -72,7 +72,7 @@ public class Parser {
 
             retval = new Command(idNum, type, msgLen, array);
         } catch (Exception e) {
-            System.err.println("PARSER: Message format is wrong: " + e);
+            System.err.println("PARSER: Message format is wrong: " + e.getMessage());
         }
         return retval;
     }
