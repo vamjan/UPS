@@ -1,21 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client.data_model;
 
 import java.util.List;
 
 /**
- *
+ * Class to store and manage units.
  * @author sini
  */
 public class Unit {
 
     private int ID;
-    private UnitType type;  //S - SPG, T - TANK, I - Infantry, F - Flag ////mozna predelat na enum
-    private Allegiance al;    //N - neutral, B - player1, R - player2
+    private UnitType type;
+    private Allegiance al;
     private int health;
     private int damage;
     private int moveRange;
@@ -31,16 +26,35 @@ public class Unit {
         this.dead = false;
         this.type = type;
     }
-
+    
+    /**
+     * Check movement range to axial hex coordinates.
+     * @param destX
+     * @param destZ
+     * @return can go/can't go
+     */
     public boolean checkMove(int destX, int destZ) {
         return this.checkRange(destX, destZ, this.getMoveRange());
     }
-
+    
+    /**
+     * Check attack range to unit.
+     * @param target
+     * @return 
+     */
     public boolean checkAttack(Unit target) {
         return this.checkRange(target.getCoordX(), target.getCoordZ(), this.getAttackRange());
     }
-
+    
+    /**
+     * Check range to from this unit to given axial coordinates.
+     * @param destX
+     * @param destZ
+     * @param range
+     * @return 
+     */
     private boolean checkRange(int destX, int destZ, int range) {
+        //calculating third axial coordinate
         int startY = -this.getCoordX() - this.getCoordZ();
         int destY = -destX - destZ;
 
@@ -54,11 +68,7 @@ public class Unit {
 
         return false;
     }
-
-    public boolean canAttack(List<Unit> units) {
-        return false;
-    }
-
+    
     public boolean isMovable() {
         return this.type != UnitType.FLAG;
     }

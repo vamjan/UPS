@@ -1,23 +1,29 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client.control;
 
 import ups_wargame_client.net_interface.MsgType;
 
 /**
- *
- * @author sini ID|TYPE|LENGTH|DATA|ID\n long|char|short|byte[]|long
+ * Class used to store command data and methods to manage/parse them.
+ * Format: ID|TYPE|LENGTH|DATA|ID\n long|char|short|byte[]|long
+ * @author Jan Vampol
  */
 public class Command {
-
+    //sender ID
     int clientID;
+    //type of message
     MsgType type;
+    //number of data entries
     short length;
+    //data can be of any type and have to be converteed afterwards
     Object[] data;
-
+    
+    /**
+     * Full constructor to setup all properties.
+     * @param clientID
+     * @param type
+     * @param length
+     * @param data 
+     */
     public Command(int clientID, MsgType type, short length, Object[] data) {
         this.clientID = clientID;
         this.type = type;
@@ -27,7 +33,11 @@ public class Command {
             this.data = data.clone();
         }
     }
-
+    
+    /**
+     * A quick way to create ACK command
+     * @param clientID 
+     */
     public Command(int clientID) {
         this.clientID = clientID;
         this.type = MsgType.ACK;
@@ -35,7 +45,7 @@ public class Command {
         this.data = new Object[0];
     }
     /**
-     * 
+     * Parse command data to string.
      * @return 
      */
     public String dataToString() {
@@ -46,17 +56,26 @@ public class Command {
             }
 
             if (!retval.equals("")) {
-                retval = retval.substring(0, retval.length() - 1); //clip last carka
+                retval = retval.substring(0, retval.length() - 1); //clip last deliminer
             }
         }
         return retval;
     }
-
+    
+    /**
+     * toString override used for sending/writing
+     * @return 
+     */
     @Override
     public String toString() {
         return String.format("%08X|%c|%04X|%s|%08X\n", this.clientID, this.type.getName(), this.length, this.dataToString(), this.clientID);
     }
-
+    
+    /**
+     * Returns true for message type requiring ACK/NACK from server.
+     * @param c
+     * @return 
+     */
     public static boolean requiresAck(Command c) {
         switch(c.type) {
             case CREATE_LOBBY:

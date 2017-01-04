@@ -50,9 +50,10 @@ import ups_wargame_client.data_model.Unit;
 import ups_wargame_client.net_interface.MsgType;
 
 /**
- * FXML Controller class
- *
- * @author sini
+ * FXML Controller class of game window. Serves as viewer of game data and server information.
+ * Also serves for user to control the application and send messages to server using
+ * GUI elements.
+ * @author Jan Vampol
  */
 public class GameWindowLayoutController implements Initializable, IViewable {
 
@@ -73,9 +74,11 @@ public class GameWindowLayoutController implements Initializable, IViewable {
 
     @FXML
     private ListView lobbyList;
+    //observable list of lobbies, works with ListView lobbyList
     private ObservableList<Lobby> obsLobby = FXCollections.observableArrayList();
     @FXML
     private ListView gameInfo;
+    //observable list of units, works with ListView gameInfo
     private ObservableList<Unit> obsUnits = FXCollections.observableArrayList();
 
     @FXML
@@ -112,11 +115,12 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     private Label winLabel;
 
     @FXML
-    private Canvas canvasMap;
+    private Canvas canvasMap; //map canvas
     @FXML
-    private Canvas canvasField;
+    private Canvas canvasField; //unit canvas
 
     private IGameData gd = null;
+    //cached resource images
     private final Image[] cachedImages = new Image[9];
     private int lastI = 0, lastJ = 0;
     private double offsetX;
@@ -135,12 +139,13 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         controller = ClientController.getInstance();
+        //reference view to controller
         controller.setupView(this);
-
+        //setup ListView observables
         gameInfo.setItems(obsUnits);
         lobbyList.setItems(obsLobby);
         lobbyInfo.setExpanded(false);
-
+        //load resource images and keep them in memory
         cachedImages[0] = new Image(getClass().getResourceAsStream("/Flag_white.png"));
         cachedImages[1] = new Image(getClass().getResourceAsStream("/Flag_blue.png"));
         cachedImages[2] = new Image(getClass().getResourceAsStream("/Flag_red.png"));
@@ -169,7 +174,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 backToStart();
             }
         });
-
+        //send get_server to refresh server data
         refreshButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -177,7 +182,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.GET_SERVER, (short) 0, null));
             }
         });
-
+        //get name form user and send create_lobby with name to server
         addLobbyButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
@@ -194,7 +199,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 }
             }
         });
-
+        //sending join_lobby on click
         connectLobbyButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -206,7 +211,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 }
             }
         });
-
+        //sending leave_lobby on click
         leaveLobbyButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -217,21 +222,21 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 }
             }
         });
-
+        //sending toggle_ready on click
         readyButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.TOGGLE_READY, (short) 0, null));
             }
         });
-
+        //sending end on click
         concedeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.END, (short) 0, null));
             }
         });
-
+        //sending skip on click when client is on turn
         skipButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -278,7 +283,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 }
             }
         });
-
+        //play on click on map
         canvasField.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {

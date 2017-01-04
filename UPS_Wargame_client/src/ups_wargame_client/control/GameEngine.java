@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client.control;
 
 import javafx.application.Platform;
@@ -10,21 +5,34 @@ import ups_wargame_client.data_model.IGameData;
 import ups_wargame_client.net_interface.MsgType;
 
 /**
- *
- * @author sini
+ * This class produces ticks. Each tick engine will try to execute all commands on
+ * command queues and redraw the gamedata to view (if data are updated). Engine is
+ * blocked when there are no commands to be executed and will get unblocked every
+ * TIMEOUT or when new command is added to input/output queue. If there is now input
+ * from server for 3xTIMEOUT, the engine will close the application back to connect window.
+ * @author Jan Vampol
  */
 public class GameEngine implements Runnable {
 
     private final long TIMEOUT = 1666;
-
+    //controller reference
     private ClientController controller = null;
+    //running flag
     private boolean running = true;
+    //number of timeouts withou input
     private int out = 0;
-
+    
+    /**
+     * Contructor links with controller reference
+     */
     public GameEngine() {
         controller = ClientController.getInstance();
     }
-
+    
+    /**
+     * Run method to implement Runnable. Executes the game and command execution loop.
+     * Also checks fro timeouts.
+     */
     @Override
     public void run() {
         Command input = null;
@@ -38,7 +46,7 @@ public class GameEngine implements Runnable {
                 if (System.currentTimeMillis() >= (currentTime + TIMEOUT)) {
                     if (out > 2) {
                         controller.sendCommand(new Command(controller.getClientID(), MsgType.DISCONNECT, (short) 0, null));
-                        this.stopRunning(); //TODO: fuj
+                        this.stopRunning(); //HACK: This is not a great solution...but it works ¯\_(ツ)_/¯
                         System.err.println("[ENGINE]: Timed out!");
                     }
                     if (running == false) {
@@ -69,14 +77,17 @@ public class GameEngine implements Runnable {
 
         System.out.println("Result on exit: " + controller.getAckString());
     }
-
+    
     private void update() {
         /*try {
             Thread.sleep(1);
         } catch (InterruptedException ie) {
         }*/
     }
-
+    
+    /**
+     * If there are any updates in game data, this method will redraw the view.
+     */
     private void render() {
         IGameData data = controller.getGameData();
         if (data != null) {
@@ -88,7 +99,10 @@ public class GameEngine implements Runnable {
             });
         }
     }
-
+    
+    /**
+     * Block engine to wait for TIMEOUT or new command.
+     */
     private void block() {
         try {
             synchronized (this) {
@@ -98,7 +112,10 @@ public class GameEngine implements Runnable {
             System.err.println("[ENGINE]: Engine blocking exception!");
         }
     }
-
+    
+    /**
+     * Set engine flag to stop running.
+     */
     public void stopRunning() {
         this.running = false;
     }

@@ -1,17 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client.net_interface;
 
 import ups_wargame_client.control.Command;
 
 /**
- *
+ * Class for parsing input strings from the network.
+ * Format: ID|TYPE|LENGTH|DATA|ID\n long|char|short|byte[]|long
  * @author sini
- *
- * ID|TYPE|LENGTH|DATA|ID\n long|char|short|byte[]|long
  */
 public class Parser {
 
@@ -22,7 +16,15 @@ public class Parser {
      */
     private Parser() {
     }
-
+    
+    /**
+     * Parse input from input string to command. Firstly it will look for command end symbol \n
+     * and start parsing command backwards from that. It then takes 8 symbols before end as ID
+     * and looks for the same sequence somewhere in the data. When found, it determines the command
+     * and tries to parse it.
+     * @param input
+     * @return 
+     */
     public static Command parseInput(String input) {
         Command retval = null;
 
@@ -52,7 +54,7 @@ public class Parser {
 
             if (msgLen > 0) {
                 int dataCount = tmp.length - 2;
-                if (dataCount > msgLen) {
+                if (dataCount > msgLen) { //more data means skipping some deliminers and leaving them in data
                     dataCount = dataCount / msgLen;
                     for(int i = 0; i < msgLen; i++) {
                         String hlp = "";
@@ -60,7 +62,7 @@ public class Parser {
                             hlp += tmp[2 + j + i*dataCount];
                             hlp += "|";
                         }
-                        hlp = hlp.substring(0, hlp.length()-1);
+                        hlp = hlp.substring(0, hlp.length()-1); //clip last delim
                         array[i] = hlp;
                     }
                 } else {
@@ -81,6 +83,12 @@ public class Parser {
         return output.toString();
     }
 
+    /**
+     * Look for the same sequence as id somewhere in the remaining string. From back to start.
+     * @param msg
+     * @param id
+     * @return 
+     */
     private static String findCommand(String msg, String id) {
         String retval = null;
 

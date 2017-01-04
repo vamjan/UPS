@@ -1,14 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client.data_model;
 
-import java.util.ArrayList;
-
 /**
- *
+ * Class to store map data and working with axial coordinates.
  * @author sini
  */
 public class Playfield {
@@ -47,7 +40,12 @@ public class Playfield {
         this.map = map;
     }
 
-    //
+    /**
+     * Get hex by axial.
+     * @param r
+     * @param q
+     * @return 
+     */
     public char getHex(int r, int q) {
         int i = r + (q + 1) / 2, j = q;
         char retval = 0;
@@ -58,7 +56,13 @@ public class Playfield {
 
         return retval;
     }
-
+    
+    /**
+     * Set hex by axial
+     * @param r
+     * @param q
+     * @param value 
+     */
     public void setHex(int r, int q, char value) {
         int i = r + (q + 1) / 2, j = q;
 
@@ -66,7 +70,13 @@ public class Playfield {
             map[i][j] = value;
         }
     }
-
+    
+    /**
+     * Check boundaries of the map.
+     * @param i
+     * @param j
+     * @return 
+     */
     public boolean contains(int i, int j) {
         if ((i >= 0 && this.rows > i) && (j >= 0 && this.columns > j)) {
             return true;
@@ -74,15 +84,30 @@ public class Playfield {
             return false;
         }
     }
-    
+    /**
+     * Converts array index coordinates to axial rows.
+     * @param i
+     * @param j
+     * @return 
+     */
     public static int getRow(int i, int j) {
         return i - (j + 1) / 2;
     }
-
+    
+    /**
+     * Converts axial coordinates to array index row.
+     * @param r
+     * @param q
+     * @return 
+     */
     public static int convertRow(int r, int q) {
         return r + (q + 1) / 2;
     }
-
+    
+    /**
+     * Print playfield to console.
+     * Not tested.
+     */
     public void print() { //might be broken
         for (int i = 0; i < this.rows; i++) {
             if (i % 2 == 0) {

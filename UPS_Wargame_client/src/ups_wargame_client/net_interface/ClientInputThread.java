@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client.net_interface;
 
 import ups_wargame_client.control.Command;
@@ -13,8 +8,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 /**
- *
- * @author sini
+ * Implements runnable and runs as its own thread.
+ * Listens to messages form the server and tries to parse them.
+ * Sends parsed commands to controller.
+ * @author Jan Vampol
  */
 public class ClientInputThread implements Runnable {
 
@@ -41,7 +38,10 @@ public class ClientInputThread implements Runnable {
         }
         System.out.println("Input thread stopped ...");
     }
-
+    /**
+     * Parses input string and sends it to controller as command if possible.
+     * @param msg 
+     */
     private void handle(String msg) {
         if(msg != null) {
             //System.out.println("[IN]: Incoming message: " + msg);

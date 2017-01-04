@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client.views;
 
 import java.io.IOException;
@@ -27,8 +22,9 @@ import ups_wargame_client.control.ClientController;
 import ups_wargame_client.control.GameEngine;
 
 /**
- *
- * @author sini
+ * Connect window which starts the application.
+ * Lets user to enter IP, port, name and optionaly ID. 
+ * @author Jan Vampol
  */
 public class MainWindowLayoutController implements Initializable {
 
@@ -64,7 +60,7 @@ public class MainWindowLayoutController implements Initializable {
                         ClientController.getInstance().setupID(ID);
                     }
 
-                    if (!ClientController.getInstance().setupConnection(serverName, portNum, name.replace("|", ""))) {
+                    if (!ClientController.getInstance().setupConnection(serverName, portNum, name.replace("|", ""))) { //try to connect
                         Alert alert = new Alert(AlertType.ERROR);
                         alert.setTitle("Connection not possible");
                         alert.setHeaderText("I was unable to connect");
@@ -79,14 +75,14 @@ public class MainWindowLayoutController implements Initializable {
                             stage.setTitle("Wargame");
                             stage.setScene(new Scene(root));
 
-                            GameWindowLayoutController controller = (GameWindowLayoutController) loader.getController();
+                            GameWindowLayoutController controller = (GameWindowLayoutController) loader.getController(); //initialize game window controller
                             controller.setPrimaryStage(stage);
 
                             stage.show();
 
-                            GameEngine e = new GameEngine();
-                            ClientController.getInstance().setupEngine(e);
-                            ClientController.getInstance().startConnection();
+                            GameEngine e = new GameEngine(); //create engine
+                            ClientController.getInstance().setupEngine(e); //and add its reference to controller
+                            ClientController.getInstance().startConnection(); //start the connection to server
                             // Hide this current window
                             ((Node) (event.getSource())).getScene().getWindow().hide();
                         } catch (IOException ioe) {
@@ -95,7 +91,7 @@ public class MainWindowLayoutController implements Initializable {
                         }
                     }
                 } catch (NumberFormatException nfe) {
-                    System.err.println("Wrong port input!");
+                    System.err.println("Wrong port or ID input!");
                 } catch (IllegalArgumentException iae) {
                     System.err.println("Port number is out or range!");
                 }

@@ -1,18 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ups_wargame_client.net_interface;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 /**
- *
+ * Sends output to server.
  * @author sini
  */
-public class ClientOutputThread {
+public class ClientOutputThread { //this name is confusing since this is not running its own thread... for now
 
     private OutputStreamWriter streamOut = null;
 
@@ -24,7 +19,10 @@ public class ClientOutputThread {
         this.write(msg);
         //System.out.println("[OUT]: Sending message: " + msg);
     }
-
+    /**
+     * Send string to server imediately.
+     * @param msg 
+     */
     public void write(String msg) {
         try {
             streamOut.write(msg);
