@@ -124,7 +124,8 @@ void *start_server(void *arg) {
  */
 client_data *create_client(int fd) {
     client_data * retval = malloc(sizeof (client_data));
-
+	
+	retval->id_key = 0;
     retval->fd = fd;
     retval->message_buffer = create_buffer();
     retval->read = 0;
@@ -138,6 +139,8 @@ client_data *create_client(int fd) {
  * @param client
  */
 void destroy_client(client_data** client) {
+	printf("destroying client on %p\n", client);
+	free((*client)->message_buffer);
     free(*client);
     *client = NULL;
 }
@@ -196,7 +199,7 @@ void *start_client(void *arg) {
             break;
         } //no problem... time to read!
         ioctl(data->fd, FIONREAD, &a2read);
-        // mame co cist
+        // there are data to read
         if (a2read > 0) {
             int read_bytes = (a2read > DROP) ? DROP : a2read; //read max DROP or less
             memset(&cbuf, 0, sizeof (char)*DROP); //might be redundant
@@ -207,10 +210,10 @@ void *start_client(void *arg) {
                 command *c = parse_input(data->message_buffer, &data->read);
                 if (c) {
                     flush_buffer(data->message_buffer, data->read);
-                    data->read = 0; //TODO: asi pridat do flush_buffer
+                    data->read = 0; //TODO: move this to flush_buffer
                     //logger("INFO", );
 
-                    //zpracuj zpravu
+                    //execute message from the client
                     command *response = execute_command(c, data, &client_index, &lobby_index);
                     if (response) {
                         char *com_msg = parse_output(response);
@@ -226,7 +229,7 @@ void *start_client(void *arg) {
                     break;
                 }
             }
-        } else { // na socketu se stalo neco spatneho
+        } else { // socket error
             char str[100];
             sprintf(str, "Client %d disconnected. FD %d is now free.", client_index, data->fd);
             logger("WARN", str);
@@ -473,7 +476,7 @@ char **parse_capture(unit *capturer, unit *captured) {
 
     retval[0] = calloc(sizeof (char), 4);
     snprintf(retval[0], 4, "%d", capturer->ID);
-    retval[1] = calloc(sizeof (char), 2);
+    retval[1] = calloc(sizeof (char), 4);
     snprintf(retval[1], 4, "%d", captured->ID);
 
     return retval;
@@ -613,7 +616,7 @@ command *execute_command(command *c, client_data *client, int *client_index, int
                     server->clients[*client_index]->active = 0;
                     server->clients[index]->fd = server->clients[*client_index]->fd;
                     server->clients[index]->active = 1;
-                    destroy_client(&server->clients[*client_index]);
+					destroy_client(&server->clients[*client_index]); // THIS BROKES EVERYTHING
                     server->client_count--;
                     *client_index = index;
                     server_update(server, server->clients[*client_index]);

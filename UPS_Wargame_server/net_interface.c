@@ -71,6 +71,6 @@ int add_to_buffer(char *buffer, const char *msg, int *read) {
 int flush_buffer(char *buffer, const int read) {
     logger("INFO", "Flushing buffer...");
     memset(buffer, 0, sizeof(char) * read);
-    memcpy(buffer, buffer + read, sizeof(char) * (BUFFER_LENGTH - read));
+    memmove(buffer, buffer + read, sizeof(char) * (BUFFER_LENGTH - read));
     return 1;
 }
