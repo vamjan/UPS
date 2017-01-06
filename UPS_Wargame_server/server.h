@@ -32,6 +32,8 @@ typedef struct {
     char *message_buffer;
     int read;
     int active;
+    pthread_t client_thread;
+    int running;
 } client_data;
 
 /**
@@ -46,6 +48,7 @@ typedef struct {
     int game_in_progress;
     playfield *pf;
     char lobby_name[NAME_LENGTH];
+    pthread_mutex_t execution_lock;
 } lobby;
 
 /**
@@ -76,10 +79,11 @@ void remove_client(client_data *client, lobby *lobby, int lobby_index);
 void *start_client(void *arg);
 int find_inactive_client(client_data * clients[], int max_clients);
 int find_client_by_id(client_data * clients[], int id_key, int max_clients);
+int get_client_by_fd(client_data *clients[], int fd, int max_clients);
 void reconnect_to_lobby(server_data *server, client_data *client);
 int init_lobby(lobby *lobbies[], int max_lobbies, char *name);
 char **parse_server_data(lobby *lobbies[], int max_lobby, int active_lobby);
-command *execute_command(command *c, client_data *client, int *client_index, int *lobby_index);
+command * execute_command(server_data *server, client_data *client, command *input, int *lobby_index);
 
 void broadcast(command *c);
 void broadcast_lobby(command *c, lobby *l);
