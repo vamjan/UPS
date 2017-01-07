@@ -224,10 +224,15 @@ void *start_server(void *arg) {
                     int client_index = find_client_by_fd(server->clients, fd, server->max_clients);
                     if (client_index >= 0 && a2read > 0) {
                         return_value = read_input(server, server->clients[client_index], a2read, &client_index, authenticate_connetion);
-                        if (return_value) { //client sent enough data for command (good or bad)
+                        if (return_value > 0) { //client sent enough data for command (good or bad)
                             FD_CLR(fd, &client_socks);
                             printf("Server: ztracim fd %d\n", fd);
-                        }
+                        } else if (return_value == -1){ //data was bad
+							FD_CLR(fd, &client_socks);
+							close(server->clients[client_index]->fd);
+							destroy_client(&server->clients[client_index]);
+                            printf("Server: ztracim fd %d\n", fd);
+						}
                     } else {
                         char str[100];
                         sprintf(str, "Client %d disconnected. FD %d is now free.", client_index, fd);

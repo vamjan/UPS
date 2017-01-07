@@ -85,7 +85,7 @@ int remove_player(lobby *target, client_data *player) {
  * @return 
  */
 int lobby_is_empty(lobby *target) {
-    if (target->player_one && !target->player_two) {
+    if (target->player_one && target->player_two) {
         if(!target->player_one->active && !target->player_two->active) {
             return 1;
         } else {
