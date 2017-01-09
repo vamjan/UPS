@@ -199,7 +199,7 @@ public class GameWindowLayoutController implements Initializable, IViewable {
                 // Traditional way to get the response value.
                 Optional<String> result = dialog.showAndWait();
                 if (result.isPresent() && result.get().length() <= 30) {
-                    Object o[] = {result.get().replace("|", "")};
+                    Object o[] = {result.get()};
                     controller.addToOutputQueue(new Command(controller.getClientID(), MsgType.CREATE_LOBBY, (short) 1, o));
                 }
             }

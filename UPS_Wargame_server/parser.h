@@ -1,15 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /* 
  * File:   Parser.h
- * Author: sini
+ * Author: Jan Vampol
  *
  * Created on 26 November 2016, 20:44
  */
+#include "hex.h"
 
 #ifndef PARSER_H
 #define PARSER_H
@@ -56,8 +51,12 @@ command *parse_input(const char *msg, int *read);
 int find_command_start(const char *msg, const char *id, const int end);
 command *parse_string(const char *msg);
 char *parse_output(const command *command);
+char **magic_data(char const *msg, int count);
 char *parse_command(const command *command);
 char *parse_data(char **data, const int length);
+char **parse_move(int ID, int coordX, int coordZ);
+char **parse_attack(unit *attacker, unit *target);
+char **parse_capture(unit *capturer, unit *captured);
 msg_type get_type(const char c);
 
 #endif /* PARSER_H */

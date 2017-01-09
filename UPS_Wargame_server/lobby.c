@@ -132,27 +132,21 @@ void kick_inactive(lobby *target) {
  * @param index
  * @return 
  */
-char *parse_lobby(lobby *target, int index) {
-    char retval[BUFFER_LENGTH];
-    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
+char **parse_lobby(lobby *target, int index) {
+    char **retval = malloc(sizeof(char *) * 7);
+    retval[0] = calloc(sizeof (char), 4);
+    snprintf(retval[0], 4, "%d", index);
+    retval[1] = strdup(target->lobby_name);
+    retval[2] = calloc(sizeof(char), 2);
+    retval[2][0] = (target->game_in_progress) ? 'T' : 'F';
+    retval[3] = (target->player_one) ? strdup(target->player_one->player_name) : strdup(FREE);
+    retval[4] = calloc(sizeof(char), 2);
+    retval[4][0] = (target->ready_one) ? 'T' : 'F';
+    retval[5] = (target->player_two) ? strdup(target->player_two->player_name) : strdup(FREE);
+    retval[6] = calloc(sizeof(char), 2);
+    retval[6][0] = (target->ready_two) ? 'T' : 'F';
 
-    char player_one[30] = FREE;
-    char player_one_ready[30] = NOT_READY;
-    char player_two[30] = FREE;
-    char player_two_ready[30] = NOT_READY;
-    if (target->player_one) {
-        strncpy(player_one, target->player_one->player_name, strlen(target->player_one->player_name));
-        if(target->ready_one) strncpy(player_one_ready, READY, strlen(READY));
-    } 
-    if (target->player_two) {
-        strncpy(player_two, target->player_two->player_name, strlen(target->player_two->player_name));
-        if(target->ready_two) strncpy(player_two_ready, READY, strlen(READY));
-    }
-
-    snprintf(retval, BUFFER_LENGTH, "%d|%s|%c|%s|%s|%s|%s", index, target->lobby_name, target->game_in_progress ? 'T' : 'F',
-            player_one, player_one_ready, player_two, player_two_ready);
-
-    return strdup(retval);
+    return retval;
 }
 
 /**

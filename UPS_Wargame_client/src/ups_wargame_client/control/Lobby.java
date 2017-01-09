@@ -84,9 +84,9 @@ public class Lobby {
         try {
             retval = new Lobby(Integer.parseInt(args[0]), args[1]);
             retval.setPlayerOne(args[3]);
-            retval.setReadyOne(args[4].equals("RDY"));
+            retval.setReadyOne(args[4].equals("T"));
             retval.setPlayerTwo(args[5]);
-            retval.setReadyTwo(args[6].equals("RDY"));
+            retval.setReadyTwo(args[6].equals("T"));
         } catch (NumberFormatException nfe) {
             System.err.println("Can't create lobby from arguments: " + args);
         }

@@ -58,7 +58,7 @@ int destroy_command(command **command) {
 
     if ((*command)->data) {
         int i;
-        for(i = 0; i < (*command)->length; i++) {
+        for (i = 0; i < (*command)->length; i++) {
             free((*command)->data[i]);
         }
         free((*command)->data);
@@ -140,7 +140,7 @@ int find_command_start(const char *msg, const char *id, const int end) {
  * @return command or NULL
  */
 command *parse_string(const char *msg) {
-    int id, i;
+    int id;
     short length;
     msg_type type;
     char *token, *tmp = strdup(msg), **data, *err;
@@ -157,18 +157,51 @@ command *parse_string(const char *msg) {
     if (token) length = (short) strtol(token, &err, 16); //TODO: possible overflow
     if (*err != '\0' && (length >= 0 && length < 32767)) return retval;
 
-    data = calloc(sizeof (char *), length);
-    i = 0;
+    //start parsing data
+    memset(tmp, 0, strlen(msg));
+    memcpy(tmp, msg + 16, strlen(msg + 16) - 9);
 
-    token = strtok(NULL, DELIM);
-    while (token && i < length) {
-        data[i++] = strdup(token);
-        token = strtok(NULL, DELIM);
-    }
+    data = magic_data(tmp, length);
 
     retval = create_command(id, type, length, data);
 
     free(tmp);
+
+    return retval;
+}
+
+/**
+ * Parse message data and escape characters
+ * @param msg
+ * @param count
+ * @return 
+ */
+char **magic_data(char const *msg, int count) {
+    char **retval = calloc(sizeof (char *), count);
+    int i = 0, read = 0, data_count = 0, max_length = strlen(msg), escaped = 0;
+    char tmp[max_length+1];
+    memset(tmp, 0, max_length+1);
+
+    if (count > 0) {
+        while (read < max_length && data_count < count) {
+            if (msg[read] == '~') {
+                read++;
+                escaped = 1;
+            }
+
+            if (msg[read] == DELIM[0] && !escaped) {
+                retval[data_count++] = strdup(tmp);
+                memset(tmp, 0, max_length+1);
+                escaped = 0;
+                i = 0;
+                read++;
+            } else {
+                tmp[i++] = msg[read++];
+            }
+        }
+        
+        retval[data_count] = strdup(tmp);
+    }
 
     return retval;
 }
@@ -181,7 +214,7 @@ command *parse_string(const char *msg) {
 char *parse_command(const command *command) {
     char retval[BUFFER_LENGTH], *data;
 
-    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
+    memset(retval, 0, sizeof (char) * BUFFER_LENGTH);
 
     if (command->length) {
         data = parse_data(command->data, command->length);
@@ -202,14 +235,22 @@ char *parse_command(const command *command) {
  */
 char *parse_data(char **data, const int length) {
     char retval[BUFFER_LENGTH];
-    int i, size = 0;
+    int i, j, size = 0;
 
-    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
+    memset(retval, 0, sizeof (char) * BUFFER_LENGTH);
 
     for (i = 0; i < length; i++) {
+        int escaped = 0;
         memcpy(retval + size, data[i], strlen(data[i]));
-        size += strlen(data[i]);
-        if (i != length - 1) retval[size++] = DELIM[0];
+        for(j = size; j < strlen(retval); j++) {
+            if(retval[j] == '~' || retval[j] == '|') {
+                memmove(retval + j + 1, retval + j, strlen(data[i]) - j + size + escaped); //make room for escape character
+                retval[j++] = '~';
+                escaped++;
+            }
+        }
+        size = strlen(retval);
+        if (i != length - 1) retval[size++] = DELIM[0]; //add delim between each data strings
     }
 
     return strdup(retval);
@@ -222,11 +263,67 @@ char *parse_data(char **data, const int length) {
  */
 char *parse_output(const command *command) {
     char retval[BUFFER_LENGTH];
-    
-    memset(retval, 0, sizeof(char) * BUFFER_LENGTH);
+
+    memset(retval, 0, sizeof (char) * BUFFER_LENGTH);
     snprintf(retval, BUFFER_LENGTH, "%s\n", parse_command(command));
 
     return strdup(retval);
+}
+
+/**
+ * Parse move command information to string to be send as additional information to client
+ * @param ID of unit
+ * @param coordX of unit
+ * @param coordZ of unit
+ * @return array of strings as move info
+ */
+char **parse_move(int ID, int coordX, int coordZ) {
+    char **retval = malloc(sizeof (char *) * 3);
+
+    retval[0] = calloc(sizeof (char), 4);
+    snprintf(retval[0], 4, "%d", ID);
+    retval[1] = calloc(sizeof (char), 4);
+    snprintf(retval[1], 4, "%d", coordX);
+    retval[2] = calloc(sizeof (char), 4);
+    snprintf(retval[2], 4, "%d", coordZ);
+
+    return retval;
+}
+
+/**
+ * Parse attack command information to string to be send as additional information to client
+ * @param attacker unit
+ * @param target unit
+ * @return array of strings representing attack info
+ */
+char **parse_attack(unit *attacker, unit * target) {
+    char **retval = malloc(sizeof (char *) * 3);
+
+    retval[0] = calloc(sizeof (char), 4);
+    snprintf(retval[0], 4, "%d", attacker->ID);
+    retval[1] = calloc(sizeof (char), 4);
+    snprintf(retval[1], 4, "%d", target->ID);
+    retval[2] = calloc(sizeof (char), 4);
+    snprintf(retval[2], 4, "%d", target->health);
+
+    return retval;
+}
+
+/**
+ * Parse capture command information to string to be send as additional information to client
+ * @param capturer capturing unit
+ * @param captured captured unit
+ * @return array of strings representing capture info
+ */
+char **parse_capture(unit *capturer, unit * captured) {
+    char **retval = malloc(sizeof (char *) * 2);
+
+    retval[0] = calloc(sizeof (char), 4);
+    snprintf(retval[0], 4, "%d", capturer->ID);
+    retval[1] = calloc(sizeof (char), 4);
+    snprintf(retval[1], 4, "%d", captured->ID);
+
+    return retval;
 }
 
 /**

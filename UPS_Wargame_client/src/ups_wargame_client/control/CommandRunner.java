@@ -214,6 +214,7 @@ public class CommandRunner {
             case CONNECT: //client tried to connect with invalid ID
                 System.out.println("Invalid ID!");
                 Platform.runLater(() -> {
+                    controller.getView().refuse();
                     controller.getView().backToStart();
                 });
                 break;
@@ -308,10 +309,15 @@ public class CommandRunner {
 
     private List parseServerData(Command c) {
         List retval = new ArrayList();
-
+        int added = 0;
+        String[] tmp = new String[7];
         for (int i = 0; i < c.length; i++) {
-            String[] tmp = ((String) c.data[i]).split("\\|");
-            retval.add(Lobby.parseLobby(tmp));
+            tmp[added++] = (String)c.data[i];
+            if(added == 7) {
+                retval.add(Lobby.parseLobby(tmp));
+                tmp = new String[7];
+                added = 0;
+            }
         }
 
         return retval;

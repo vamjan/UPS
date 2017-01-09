@@ -52,13 +52,17 @@ public class Command {
         String retval = "";
         if (this.length > 0) {
             for (Object val : data) {
-                retval += (val.toString() + "|");
+                String tmp = val.toString();
+                tmp = tmp.replace("~", "~~");
+                tmp = tmp.replace("|", "~|");
+                retval += tmp + "|";
             }
 
             if (!retval.equals("")) {
                 retval = retval.substring(0, retval.length() - 1); //clip last deliminer
             }
         }
+        
         return retval;
     }
     

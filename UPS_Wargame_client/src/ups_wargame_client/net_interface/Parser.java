@@ -5,9 +5,9 @@ import ups_wargame_client.control.Command;
 /**
  * Class for parsing input strings from the network.
  * Format: ID|TYPE|LENGTH|DATA|ID\n long|char|short|byte[]|long 
- * (?<!\|)  # assert that the previous character is not a pipe
- * \|       # match a literal : character
- * (?!\|)   # assert that the next character is not a pipe
+ * (?v!\|)   assert that the previous character is not a pipe
+ * \|        match a literal : character
+ * (?!\|)    assert that the next character is not a pipe
  * @author sini
  */
 public class Parser {
@@ -45,7 +45,7 @@ public class Parser {
             int idNum = (int) Long.parseLong(id, 16);
 
             String com = findCommand(input, id);
-            String[] tmp = com.split("\\|");
+            String[] tmp = com.split("(?<!~)\\|");
 
             MsgType type = MsgType.getMsgTypeByName(tmp[0].charAt(0));
             if (type == null) {
@@ -56,22 +56,9 @@ public class Parser {
             Object[] array = new Object[msgLen];
 
             if (msgLen > 0) {
-                int dataCount = tmp.length - 2;
-                if (dataCount > msgLen) { //more data means skipping some deliminers and leaving them in data
-                    dataCount = dataCount / msgLen;
-                    for(int i = 0; i < msgLen; i++) {
-                        String hlp = "";
-                        for(int j = 0; j < dataCount; j++) {
-                            hlp += tmp[2 + j + i*dataCount];
-                            hlp += "|";
-                        }
-                        hlp = hlp.substring(0, hlp.length()-1); //clip last delim
-                        array[i] = hlp;
-                    }
-                } else {
-                    for (int i = 2; i < tmp.length; i++) {
+                for (int i = 2; i < tmp.length; i++) {
+                        tmp[i] = tmp[i].replace("~|", "|"); //escape deliminers from data
                         array[i - 2] = tmp[i];
-                    }
                 }
             }
 
@@ -83,7 +70,11 @@ public class Parser {
     }
 
     public static String parseOutput(Command output) {
-        return output.toString();
+        String retval = output.toString();
+        //retval = retval.replace("~", "~~");
+        //retval = retval.replace("|", "~|");
+        System.out.println(retval);
+        return retval;
     }
 
     /**

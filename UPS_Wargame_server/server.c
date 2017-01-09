@@ -24,6 +24,13 @@ extern char *strdup(const char *s);
 int server_socket;
 server_data *server;
 
+/**
+ * Accepts connection when client connects to server socket and is not yet synchronised
+ * with the server. Refuses connection when server is full.
+ * @param server
+ * @param socket
+ * @return true/false depending on accept result
+ */
 int accept_connection(server_data *server, fd_set *socket) {
     struct sockaddr_in peer_addr;
     int len_addr = sizeof (peer_addr);
@@ -69,6 +76,17 @@ int accept_connection(server_data *server, fd_set *socket) {
     }
 }
 
+/**
+ * Synchronise client with server. Saves client ID on the server and allows client
+ * access to server functions. Can refuse authorisation when ID is in use.
+ * Handles reconnection.
+ * This function is passed to function read_input as parameter.
+ * @param server
+ * @param client
+ * @param input
+ * @param client_index
+ * @return return command ACK/NACK
+ */
 command* authenticate_connetion(server_data *server, client_data *client, command *input, int *client_index) {
     command *retval = NULL;
     int index;
@@ -83,7 +101,7 @@ command* authenticate_connetion(server_data *server, client_data *client, comman
                 server_update(server, server->clients[index]);
                 reconnect_to_lobby(server, server->clients[index]);
                 retval = create_command(server->clients[index]->id_key, ACK, 0, NULL);
-                int *arg = malloc(sizeof(int));
+                int *arg = malloc(sizeof (int));
                 *arg = index;
                 pthread_create(&server->clients[index]->client_thread, NULL, start_client, arg);
             }
@@ -103,6 +121,16 @@ command* authenticate_connetion(server_data *server, client_data *client, comman
     return retval;
 }
 
+/**
+ * Read input from client file descriptor and try parse it into command.
+ * Can have different functions passed as parameters to change used operation.
+ * @param server
+ * @param data
+ * @param a2read
+ * @param index
+ * @param function
+ * @return read successful
+ */
 int read_input(server_data *server, client_data *data, int a2read, int *index, command * (*function)(server_data *server, client_data *client, command *input, int *lobby_index)) {
     int read_bytes = (a2read > DROP) ? DROP : a2read; //read max DROP or less
     char cbuf[DROP];
@@ -111,7 +139,7 @@ int read_input(server_data *server, client_data *data, int a2read, int *index, c
     read(data->fd, &cbuf, read_bytes);
     add_to_buffer(data->message_buffer, cbuf, &data->read);
 
-    while (strlen(data->message_buffer) > 0) {
+    while (strlen(data->message_buffer) > 24) { //wait for enough data
         command *input = parse_input(data->message_buffer, &data->read);
         if (input) {
             flush_buffer(data->message_buffer, data->read);
@@ -119,7 +147,9 @@ int read_input(server_data *server, client_data *data, int a2read, int *index, c
             //logger("INFO", );
             correct++;
             //execute message from the client
+            pthread_mutex_lock(&server->execution_lock);
             command *response = (command *) (*function)(server, data, input, index);
+            pthread_mutex_unlock(&server->execution_lock);
             if (response) {
                 char *com_msg = parse_output(response);
                 write(data->fd, com_msg, strlen(com_msg));
@@ -128,26 +158,16 @@ int read_input(server_data *server, client_data *data, int a2read, int *index, c
             }
             wrong = 0;
             destroy_command(&input);
-            if(function == authenticate_connetion && data->id_key == 0) {
-                destroy_client(&server->clients[*index]); 
+            if (function == authenticate_connetion && data->id_key == 0) {
+                destroy_client(&server->clients[*index]);
                 server->client_count--;
                 break;
             }
         } else {
-            wrong++;
-            if (wrong > 5) return -1;
+            return -1;
         }
     }
     return correct;
-}
-
-int find_client_by_fd(client_data *clients[], int fd, int max_clients) {
-    int i;
-    for (i = 0; i < max_clients; i++) {
-        if (clients[i] && clients[i]->fd == fd)
-            return i;
-    }
-    return -1;
 }
 
 /*
@@ -224,21 +244,21 @@ void *start_server(void *arg) {
                     int client_index = find_client_by_fd(server->clients, fd, server->max_clients);
                     if (client_index >= 0 && a2read > 0) {
                         return_value = read_input(server, server->clients[client_index], a2read, &client_index, authenticate_connetion);
-                        if (return_value > 0) { //client sent enough data for command (good or bad)
+                        if (return_value > 0) { //client sent enough data for command
                             FD_CLR(fd, &client_socks);
-                            printf("Server: ztracim fd %d\n", fd);
-                        } else if (return_value == -1){ //data was bad
-							FD_CLR(fd, &client_socks);
-							close(server->clients[client_index]->fd);
-							destroy_client(&server->clients[client_index]);
-                            printf("Server: ztracim fd %d\n", fd);
-						}
+                            printf("Server: lost fd %d\n", fd);
+                        } else if (return_value == -1) { //data was bad
+                            FD_CLR(fd, &client_socks);
+                            close(server->clients[client_index]->fd);
+                            destroy_client(&server->clients[client_index]);
+                            printf("Server: lost fd %d\n", fd);
+                        }
                     } else {
                         char str[100];
                         sprintf(str, "Client %d disconnected. FD %d is now free.", client_index, fd);
                         logger("WARN", str);
                         FD_CLR(fd, &client_socks);
-                        printf("Server: ztracim fd %d\n", fd);
+                        printf("Server: lost fd %d\n", fd);
                     }
                 }
             }
@@ -254,9 +274,9 @@ void *start_server(void *arg) {
             destroy_client(&server->clients[i]);
         }
     }
-    
-    for(i = 0; i < server->max_lobbies; i++) {
-        if(server->lobbies[i]) {
+
+    for (i = 0; i < server->max_lobbies; i++) {
+        if (server->lobbies[i]) {
             destroy_lobby(&server->lobbies[i]);
         }
     }
@@ -324,7 +344,7 @@ void *start_client(void *arg) {
     int lobby_index = -1;
     fd_set client_socks;
     struct timeval timeout;
-    
+
     printf("Client thread %d running, fd %d\n", client_index, client->fd);
 
     FD_ZERO(&client_socks);
@@ -437,6 +457,27 @@ int find_inactive_client(client_data * clients[], int max_clients) {
     return -1;
 }
 
+/**
+ * Find client by file descriptor
+ * @param clients
+ * @param fd
+ * @param max_clients
+ * @return client index or -1 if client is missing
+ */
+int find_client_by_fd(client_data *clients[], int fd, int max_clients) {
+    int i;
+    for (i = 0; i < max_clients; i++) {
+        if (clients[i] && clients[i]->fd == fd)
+            return i;
+    }
+    return -1;
+}
+
+/**
+ * Reconnection procedure which sends all necessary information to client.
+ * @param server
+ * @param client
+ */
 void reconnect_to_lobby(server_data *server, client_data * client) {
     int i;
     for (i = 0; i < server->max_lobbies; i++) {
@@ -490,14 +531,17 @@ int init_lobby(lobby * lobbies[], int max_lobbies, char *name) {
  * @return array of strings representing each lobby
  */
 char **parse_server_data(lobby * lobbies[], int max_lobby, int active_lobby) {
-    char **retval = malloc(sizeof (char *) * active_lobby);
+    char **retval = malloc(sizeof (char *) * active_lobby * 7);
 
-    int i, j = 0;
+    int i, j = 0, size = 0;
 
     for (i = 0; i < max_lobby; i++) {
         if (lobbies[i]) {
-            retval[j] = parse_lobby(lobbies[i], j);
-            j++;
+            char **tmp = parse_lobby(lobbies[i], size/7);
+            for(j = 0; j < 7; j++) {
+                retval[size] = tmp[j];
+                size++;
+            }
         }
     }
 
@@ -546,62 +590,6 @@ char **parse_game_info(lobby * lobby) {
 }
 
 /**
- * Parse move command information to string to be send as additional information to client
- * @param ID of unit
- * @param coordX of unit
- * @param coordZ of unit
- * @return array of strings as move info
- */
-char **parse_move(int ID, int coordX, int coordZ) {
-    char **retval = malloc(sizeof (char *) * 3);
-
-    retval[0] = calloc(sizeof (char), 4);
-    snprintf(retval[0], 4, "%d", ID);
-    retval[1] = calloc(sizeof (char), 4);
-    snprintf(retval[1], 4, "%d", coordX);
-    retval[2] = calloc(sizeof (char), 4);
-    snprintf(retval[2], 4, "%d", coordZ);
-
-    return retval;
-}
-
-/**
- * Parse attack command information to string to be send as additional information to client
- * @param attacker unit
- * @param target unit
- * @return array of strings representing attack info
- */
-char **parse_attack(unit *attacker, unit * target) {
-    char **retval = malloc(sizeof (char *) * 3);
-
-    retval[0] = calloc(sizeof (char), 4);
-    snprintf(retval[0], 4, "%d", attacker->ID);
-    retval[1] = calloc(sizeof (char), 4);
-    snprintf(retval[1], 4, "%d", target->ID);
-    retval[2] = calloc(sizeof (char), 4);
-    snprintf(retval[2], 4, "%d", target->health);
-
-    return retval;
-}
-
-/**
- * Parse capture command information to string to be send as additional information to client
- * @param capturer capturing unit
- * @param captured captured unit
- * @return array of strings representing capture info
- */
-char **parse_capture(unit *capturer, unit * captured) {
-    char **retval = malloc(sizeof (char *) * 2);
-
-    retval[0] = calloc(sizeof (char), 4);
-    snprintf(retval[0], 4, "%d", capturer->ID);
-    retval[1] = calloc(sizeof (char), 4);
-    snprintf(retval[1], 4, "%d", captured->ID);
-
-    return retval;
-}
-
-/**
  * Send update to all clients in lobby. Each client receives different message,
  * according to its assigned player.
  * @param c output command
@@ -628,9 +616,8 @@ void turn_update(command *command, lobby * lobby) {
  * @param index
  */
 void lobby_update(client_data *client, lobby *client_lobby, int index) {
-    char **tmp = malloc(sizeof (char *));
-    tmp[0] = parse_lobby(client_lobby, index);
-    command *command = create_command(client->id_key, JOIN_LOBBY, 1, tmp); //used to update lobby information
+    char **tmp = parse_lobby(client_lobby, index);
+    command *command = create_command(client->id_key, JOIN_LOBBY, 7, tmp); //used to update lobby information
     broadcast_lobby(command, client_lobby);
     destroy_command(&command);
 }
@@ -642,7 +629,7 @@ void lobby_update(client_data *client, lobby *client_lobby, int index) {
  */
 void server_update(server_data *server, client_data * client) {
     char **tmp = parse_server_data(server->lobbies, server->max_lobbies, server->active_lobbies);
-    command *command = create_command(client->id_key, GET_SERVER, server->active_lobbies, tmp);
+    command *command = create_command(client->id_key, GET_SERVER, server->active_lobbies*7, tmp);
     char *com_msg = parse_output(command);
     write(client->fd, com_msg, strlen(com_msg));
     destroy_command(&command);
@@ -722,7 +709,6 @@ command *execute_command(server_data *server, client_data *client, command *inpu
     int index, coordX, coordZ;
     unit *curr;
 
-    pthread_mutex_lock(&server->execution_lock);
     //if (c->type != POKE) printf("Client ID %X - lobby %d - Client index %d - fd %d\n", client->id_key, *lobby_index, *client_index, client->fd);
 
     switch (input->type) {
@@ -731,7 +717,7 @@ command *execute_command(server_data *server, client_data *client, command *inpu
             break;
         case(GET_SERVER): //might be redundant
             tmp = parse_server_data(server->lobbies, server->max_lobbies, server->active_lobbies);
-            retval = create_command(client->id_key, GET_SERVER, server->active_lobbies, tmp);
+            retval = create_command(client->id_key, GET_SERVER, server->active_lobbies*7, tmp);
             break;
         case(POKE):
             retval = create_command(client->id_key, POKE, 0, NULL);
@@ -837,7 +823,7 @@ command *execute_command(server_data *server, client_data *client, command *inpu
                 if ((index = init_lobby(server->lobbies, server->max_lobbies, input->data[0])) >= 0) {
                     server->active_lobbies++;
                     tmp = parse_server_data(server->lobbies, server->max_lobbies, server->active_lobbies);
-                    retval = create_command(client->id_key, GET_SERVER, server->active_lobbies, tmp);
+                    retval = create_command(client->id_key, GET_SERVER, server->active_lobbies*7, tmp);
                     broadcast(retval);
                     destroy_command(&retval);
                     retval = create_command(client->id_key, ACK, 0, NULL);
@@ -863,8 +849,6 @@ command *execute_command(server_data *server, client_data *client, command *inpu
                 break;
         }
     }
-
-    pthread_mutex_unlock(&server->execution_lock);
 
     return retval;
 }

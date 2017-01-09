@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Error creating thread\n");
         return EXIT_FAILURE;
     }
-
+    
     while (server.running) {
         scanf("%c", &input);
 

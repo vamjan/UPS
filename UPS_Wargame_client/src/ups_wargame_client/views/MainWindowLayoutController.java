@@ -60,7 +60,7 @@ public class MainWindowLayoutController implements Initializable {
                         ClientController.getInstance().setupID(ID);
                     }
 
-                    if (!ClientController.getInstance().setupConnection(serverName, portNum, name.replace("|", ""))) { //try to connect
+                    if (!ClientController.getInstance().setupConnection(serverName, portNum, name)) { //try to connect
                         Alert alert = new Alert(AlertType.ERROR);
                         alert.setTitle("Connection not possible");
                         alert.setHeaderText("I was unable to connect");

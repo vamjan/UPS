@@ -28,7 +28,7 @@ int remove_player(lobby *target, client_data *player);
 int lobby_is_empty(lobby *target);
 int player_present( lobby *target, client_data *player);
 void kick_inactive(lobby *target);
-char *parse_lobby(lobby *target, int index);
+char **parse_lobby(lobby *target, int index);
 int toggle_ready(lobby *target, client_data *player);
 int check_ready(lobby *target);
 int start_game(lobby *target);
