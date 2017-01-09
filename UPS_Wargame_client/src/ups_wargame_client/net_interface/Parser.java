@@ -4,7 +4,10 @@ import ups_wargame_client.control.Command;
 
 /**
  * Class for parsing input strings from the network.
- * Format: ID|TYPE|LENGTH|DATA|ID\n long|char|short|byte[]|long
+ * Format: ID|TYPE|LENGTH|DATA|ID\n long|char|short|byte[]|long 
+ * (?<!\|)  # assert that the previous character is not a pipe
+ * \|       # match a literal : character
+ * (?!\|)   # assert that the next character is not a pipe
  * @author sini
  */
 public class Parser {

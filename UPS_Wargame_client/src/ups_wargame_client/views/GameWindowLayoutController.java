@@ -31,6 +31,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
@@ -102,6 +103,8 @@ public class GameWindowLayoutController implements Initializable, IViewable {
     private TextArea serverChatTextArea;
     @FXML
     private TextArea lobbyChatTextArea;
+    @FXML
+    private TextField playerName;
 
     @FXML
     private Label playerOneLabel;
@@ -155,6 +158,8 @@ public class GameWindowLayoutController implements Initializable, IViewable {
         cachedImages[6] = new Image(getClass().getResourceAsStream("/SPG_red.png"));
         cachedImages[7] = new Image(getClass().getResourceAsStream("/Tank_blue.png"));
         cachedImages[8] = new Image(getClass().getResourceAsStream("/Tank_red.png"));
+        
+        playerName.setText(String.format("%X", controller.getClientID()));
 
         offsetX = 75;
         offsetY = 200;

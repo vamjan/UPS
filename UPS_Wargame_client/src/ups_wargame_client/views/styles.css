@@ -18,6 +18,11 @@
     -fx-font-weight: bold;
 }
 
+#clientID {
+    -fx-background-color: transparent ;
+    -fx-background-insets: 0px ;
+}
+
 .button {
     -fx-background-color: #3c3c3c;
     -fx-background-radius: 6, 5;
